@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Search, Plus, ArrowLeft, Bot, User, CheckCircle, XCircle, X } from 'lucide-react'
+import { Search, Plus, ArrowLeft, Bot, CheckCircle, XCircle, X, Trash2 } from 'lucide-react'
 import { API_ENDPOINTS, buildApiUrl } from '@/constants/api';
 import { ThemeToggle } from '@/components/ThemeToggle'
 
@@ -68,6 +68,7 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
   const [getItemId, setGetItemId] = useState('')
   const [fetchedItem, setFetchedItem] = useState<SearchItem | null>(null)
   const [isGettingItem, setIsGettingItem] = useState(false)
+  const [isDeletingItem, setIsDeletingItem] = useState(false)
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -240,6 +241,72 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
     }
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    console.log('🗑️ Delete button clicked for item ID:', itemId);
+    
+    if (!itemId.trim()) {
+      console.error('❌ Invalid item ID');
+      setNotification({
+        type: 'error',
+        message: 'Invalid item ID',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      return;
+    }
+
+    console.log('✅ Proceeding with deletion (confirmation temporarily removed for testing)...');
+    setIsDeletingItem(true);
+
+    const deleteUrl = `${API_ENDPOINTS.DELETE_ITEM}?id=${encodeURIComponent(itemId)}`;
+    console.log('📡 Making DELETE request to:', deleteUrl);
+
+    try {
+      // Call the delete-item API endpoint
+      const response = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('📥 Delete response status:', response.status);
+      console.log('📥 Delete response headers:', Object.fromEntries(response.headers.entries()));
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Clear the fetched item if it was deleted
+        if (fetchedItem && fetchedItem.id === itemId) {
+          setFetchedItem(null);
+        }
+        
+        // Remove from search results if present
+        setSearchResults(searchResults.filter(item => item.id !== itemId));
+        
+        setNotification({
+          type: 'success',
+          message: `Item "${result.deletedItem?.title || 'Unknown'}" deleted successfully!`,
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      } else {
+        setNotification({
+          type: 'error',
+          message: result.message || 'Failed to delete item',
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      setNotification({
+        type: 'error',
+        message: 'Failed to delete item. Please check your connection and try again.',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+    } finally {
+      setIsDeletingItem(false);
+    }
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'Documentation': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
@@ -352,7 +419,19 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
             {/* Display fetched item */}
             {fetchedItem && (
               <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-                <h4 className="font-semibold text-lg mb-2">{fetchedItem.title}</h4>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold text-lg">{fetchedItem.title}</h4>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteItem(fetchedItem.id)}
+                    disabled={isDeletingItem}
+                    className="flex items-center gap-1 text-xs"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {isDeletingItem ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-2">{fetchedItem.content}</p>
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(fetchedItem.category)}`}>

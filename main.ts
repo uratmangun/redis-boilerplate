@@ -3,6 +3,7 @@ import helloFunction from './functions/hello.ts';
 import addItemFunction from './functions/add-item.ts';
 import searchItemsFunction from './functions/search-items.ts';
 import getItemFunction from './functions/get-item.ts';
+import deleteItemFunction from './functions/delete-item.ts';
 
 // Function registry - add new functions here
 const functions = {
@@ -10,6 +11,7 @@ const functions = {
   'add-item': addItemFunction,
   'search-items': searchItemsFunction,
   'get-item': getItemFunction,
+  'delete-item': deleteItemFunction,
 };
 
 export default {
@@ -19,7 +21,7 @@ export default {
     // Common CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
     

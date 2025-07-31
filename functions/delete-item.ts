@@ -1,20 +1,18 @@
-// Deno function to get a specific item from Redis database
+// Deno function to delete a specific item from Redis database
 import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
 
-interface GetItemRequest {
+interface DeleteItemRequest {
   id: string;
 }
 
-interface GetItemResponse {
+interface DeleteItemResponse {
   success: boolean;
   message: string;
-  item?: {
+  deletedItem?: {
     id: string;
     title: string;
     content: string;
     category: string;
-    createdAt: string;
-    updatedAt: string;
   };
   timestamp: string;
 }
@@ -24,7 +22,7 @@ export default {
     // Handle CORS for development
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'DELETE, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
@@ -36,11 +34,11 @@ export default {
       });
     }
 
-    // Allow both GET and POST requests
-    if (request.method !== 'GET' && request.method !== 'POST') {
+    // Allow both DELETE and POST requests
+    if (request.method !== 'DELETE' && request.method !== 'POST') {
       return new Response(JSON.stringify({
         success: false,
-        message: 'Method not allowed. Use GET or POST to retrieve an item.',
+        message: 'Method not allowed. Use DELETE or POST to delete an item.',
         timestamp: new Date().toISOString(),
       }), {
         status: 405,
@@ -52,23 +50,24 @@ export default {
     }
 
     try {
-      let itemId: string = '';
+      let itemId: string;
 
-      if (request.method === 'GET') {
-        // Extract item ID from URL query parameter
+      // Handle different request methods
+      if (request.method === 'DELETE') {
+        // For DELETE requests, get ID from query parameters
         const url = new URL(request.url);
         itemId = url.searchParams.get('id') || '';
-      } else if (request.method === 'POST') {
-        // Parse request body for POST requests
-        const body: GetItemRequest = await request.json();
-        itemId = body.id || '';
+      } else {
+        // For POST requests, get ID from request body
+        const body: DeleteItemRequest = await request.json();
+        itemId = body.id;
       }
 
-      // Validate item ID
-      if (!itemId) {
+      // Validate input
+      if (!itemId || itemId.trim() === '') {
         return new Response(JSON.stringify({
           success: false,
-          message: 'Item ID is required. Provide it as a query parameter (?id=...) for GET or in request body for POST.',
+          message: 'Item ID is required',
           timestamp: new Date().toISOString(),
         }), {
           status: 400,
@@ -102,31 +101,14 @@ export default {
         password: new URL(redisUrl).password || undefined,
       });
 
-      // Get item from Redis hash
-      const rawData = await redis.hgetall(itemId);
+      // First, get the item to return its data before deletion
+      const itemData = await redis.hgetall(`item:${itemId}`);
       
-      // Convert array format to object format
-      // Redis hgetall returns ["field1", "value1", "field2", "value2", ...]
-      const itemData: Record<string, string> = {};
-      if (Array.isArray(rawData)) {
-        for (let i = 0; i < rawData.length; i += 2) {
-          const fieldName = rawData[i] as string;
-          const fieldValue = rawData[i + 1] as string;
-          itemData[fieldName] = fieldValue;
-        }
-      } else {
-        // If it's already an object, use it directly
-        Object.assign(itemData, rawData);
-      }
-      
-      // Close Redis connection
-      redis.close();
-
-      // Check if item exists
       if (!itemData || Object.keys(itemData).length === 0) {
+        await redis.quit();
         return new Response(JSON.stringify({
           success: false,
-          message: `Item with ID '${itemId}' not found.`,
+          message: `Item with ID '${itemId}' not found`,
           timestamp: new Date().toISOString(),
         }), {
           status: 404,
@@ -137,21 +119,55 @@ export default {
         });
       }
 
-      const response: GetItemResponse = {
+      // Store the item data before deletion
+      const deletedItem = {
+        id: itemId,
+        title: itemData.title || '',
+        content: itemData.content || '',
+        category: itemData.category || '',
+      };
+
+      // Delete the item from Redis hash
+      const deletedCount = await redis.del(`item:${itemId}`);
+      
+      if (deletedCount === 0) {
+        await redis.quit();
+        return new Response(JSON.stringify({
+          success: false,
+          message: `Failed to delete item with ID '${itemId}'`,
+          timestamp: new Date().toISOString(),
+        }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
+      }
+
+      // Also remove from search indexes if they exist
+      try {
+        // Remove from title index
+        await redis.srem('search:titles', itemId);
+        // Remove from content index  
+        await redis.srem('search:contents', itemId);
+        // Remove from category index
+        await redis.srem(`search:category:${deletedItem.category.toLowerCase()}`, itemId);
+      } catch (indexError) {
+        // Index cleanup errors are not critical
+        console.warn('Warning: Could not clean up search indexes:', indexError);
+      }
+
+      await redis.quit();
+
+      const response: DeleteItemResponse = {
         success: true,
-        message: 'Item retrieved successfully.',
-        item: {
-          id: (itemData.id || itemData['id'] || itemId) as string,
-          title: (itemData.title || itemData['title'] || '') as string,
-          content: (itemData.content || itemData['content'] || '') as string,
-          category: (itemData.category || itemData['category'] || 'General') as string,
-          createdAt: (itemData.createdAt || itemData['createdAt'] || '') as string,
-          updatedAt: (itemData.updatedAt || itemData['updatedAt'] || '') as string,
-        },
+        message: `Item '${deletedItem.title}' deleted successfully`,
+        deletedItem,
         timestamp: new Date().toISOString(),
       };
 
-      return new Response(JSON.stringify(response, null, 2), {
+      return new Response(JSON.stringify(response), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
@@ -160,12 +176,11 @@ export default {
       });
 
     } catch (error) {
-      console.error('Error retrieving item from Redis:', error);
+      console.error('Error deleting item from Redis:', error);
       
       return new Response(JSON.stringify({
         success: false,
-        message: 'Failed to retrieve item from Redis database.',
-        error: error.message,
+        message: error instanceof Error ? error.message : 'Unknown error occurred while deleting item',
         timestamp: new Date().toISOString(),
       }), {
         status: 500,
