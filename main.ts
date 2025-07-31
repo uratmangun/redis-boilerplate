@@ -1,24 +1,43 @@
 // Main entry point for Deno Deploy - routes to all functions
 import helloFunction from './functions/hello.ts';
+import addItemFunction from './functions/add-item.ts';
+import searchItemsFunction from './functions/search-items.ts';
+import getItemFunction from './functions/get-item.ts';
 
 // Function registry - add new functions here
 const functions = {
   hello: helloFunction,
-  // Add more functions here as you create them
-  // example: exampleFunction,
+  'add-item': addItemFunction,
+  'search-items': searchItemsFunction,
+  'get-item': getItemFunction,
 };
 
 export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     
+    // Common CORS headers
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+    
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+    
     // Extract function name from path
-    // Supports both /api/hello and /hello patterns
+    // Supports /api/hello, /hello, /functions/hello patterns
     const pathParts = url.pathname.split('/').filter(part => part.length > 0);
     let functionName = '';
     
-    if (pathParts.length >= 2 && pathParts[0] === 'api') {
-      // /api/hello pattern
+    if (pathParts.length >= 2 && (pathParts[0] === 'api' || pathParts[0] === 'functions')) {
+      // /api/hello or /functions/hello pattern
       functionName = pathParts[1];
     } else if (pathParts.length >= 1) {
       // /hello pattern
@@ -51,7 +70,7 @@ export default {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       });
     }
@@ -67,7 +86,7 @@ export default {
         status: 404,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );

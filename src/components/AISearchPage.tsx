@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Search, Plus, ArrowLeft, Bot, User } from 'lucide-react'
+import { Search, Plus, ArrowLeft, Bot, User, CheckCircle, XCircle, X } from 'lucide-react'
+import { API_ENDPOINTS, buildApiUrl } from '@/constants/api';
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface SearchItem {
@@ -59,6 +60,14 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
   const [newItemTitle, setNewItemTitle] = useState('')
   const [newItemContent, setNewItemContent] = useState('')
   const [isSearching, setIsSearching] = useState(false)
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | null
+    message: string
+    itemId?: string
+  }>({ type: null, message: '', itemId: '' })
+  const [getItemId, setGetItemId] = useState('')
+  const [fetchedItem, setFetchedItem] = useState<SearchItem | null>(null)
+  const [isGettingItem, setIsGettingItem] = useState(false)
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -67,7 +76,7 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
     
     try {
       // Call the real Redis backend API
-      const response = await fetch(`/functions/search-items?query=${encodeURIComponent(searchQuery)}&limit=50`, {
+      const response = await fetch(buildApiUrl(API_ENDPOINTS.SEARCH_ITEMS, { query: searchQuery, limit: '50' }), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -112,13 +121,17 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
 
   const handleAddItem = async () => {
     if (!newItemTitle.trim() || !newItemContent.trim()) {
-      alert('Please fill in both title and content');
+      setNotification({
+        type: 'error',
+        message: 'Please fill in both title and content',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
       return;
     }
 
     try {
       // Call the real Redis backend API
-      const response = await fetch('/functions/add-item', {
+      const response = await fetch(API_ENDPOINTS.ADD_ITEM, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,13 +158,85 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
         setSearchResults([newItem, ...searchResults]);
         setNewItemTitle('');
         setNewItemContent('');
-        alert(`Item added successfully to Redis! ID: ${result.item?.id}`);
+        setNotification({
+          type: 'success',
+          message: 'Item added successfully to Redis!',
+          itemId: result.item?.id,
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 7000);
       } else {
-        alert(`Failed to add item: ${result.message}`);
+        setNotification({
+          type: 'error',
+          message: `Failed to add item: ${result.message}`,
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
       }
     } catch (error) {
       console.error('Error adding item to Redis:', error);
-      alert('Failed to add item. Please check your connection and Redis configuration.');
+      setNotification({
+        type: 'error',
+        message: 'Failed to add item. Please check your connection and Redis configuration.',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+    }
+  };
+
+  const handleGetItem = async () => {
+    if (!getItemId.trim()) {
+      setNotification({
+        type: 'error',
+        message: 'Please enter an item ID',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      return;
+    }
+
+    setIsGettingItem(true);
+    setFetchedItem(null);
+
+    try {
+      // Call the get-item API endpoint
+      const response = await fetch(`${API_ENDPOINTS.GET_ITEM}?id=${encodeURIComponent(getItemId)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.item) {
+        const item: SearchItem = {
+          id: result.item.id,
+          title: result.item.title,
+          content: result.item.content,
+          category: result.item.category,
+          relevanceScore: 1.0
+        };
+        
+        setFetchedItem(item);
+        setNotification({
+          type: 'success',
+          message: 'Item retrieved successfully!',
+          itemId: result.item.id,
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      } else {
+        setNotification({
+          type: 'error',
+          message: result.message || 'Item not found',
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      }
+    } catch (error) {
+      console.error('Error retrieving item from Redis:', error);
+      setNotification({
+        type: 'error',
+        message: 'Failed to retrieve item. Please check your connection and try again.',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+    } finally {
+      setIsGettingItem(false);
     }
   };
 
@@ -184,6 +269,33 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
           </div>
         </div>
 
+        {/* Notification */}
+        {notification.type && (
+          <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+            notification.type === 'success' 
+              ? 'bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200'
+              : 'bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            ) : (
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            )}
+            <div className="flex-1">
+              <p className="font-medium">{notification.message}</p>
+              {notification.itemId && (
+                <p className="text-sm opacity-80 mt-1">Item ID: {notification.itemId}</p>
+              )}
+            </div>
+            <button
+              onClick={() => setNotification({ type: null, message: '' })}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {/* Add Item Section */}
         <Card className="mb-8">
           <CardHeader>
@@ -209,6 +321,47 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
             <Button onClick={handleAddItem} className="w-full">
               Add Item
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Get Item by ID Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Get Item by ID
+            </CardTitle>
+            <CardDescription>
+              Retrieve a specific item using its unique identifier
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              placeholder="Enter item ID (e.g., item:1234567890:abc123def)"
+              value={getItemId}
+              onChange={(e) => setGetItemId(e.target.value)}
+            />
+            <Button 
+              onClick={handleGetItem} 
+              className="w-full"
+              disabled={isGettingItem}
+            >
+              {isGettingItem ? 'Retrieving...' : 'Get Item'}
+            </Button>
+            
+            {/* Display fetched item */}
+            {fetchedItem && (
+              <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <h4 className="font-semibold text-lg mb-2">{fetchedItem.title}</h4>
+                <p className="text-gray-600 dark:text-gray-300 mb-2">{fetchedItem.content}</p>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(fetchedItem.category)}`}>
+                    {fetchedItem.category}
+                  </span>
+                  <span className="text-xs text-gray-500">ID: {fetchedItem.id}</span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

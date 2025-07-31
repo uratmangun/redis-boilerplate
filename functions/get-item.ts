@@ -1,13 +1,11 @@
-// Deno function to add items to Redis database
+// Deno function to get a specific item from Redis database
 import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
 
-interface AddItemRequest {
-  title: string;
-  content: string;
-  category?: string;
+interface GetItemRequest {
+  id: string;
 }
 
-interface AddItemResponse {
+interface GetItemResponse {
   success: boolean;
   message: string;
   item?: {
@@ -38,11 +36,11 @@ export default {
       });
     }
 
-    // Only allow POST requests
-    if (request.method !== 'POST') {
+    // Allow both GET and POST requests
+    if (request.method !== 'GET' && request.method !== 'POST') {
       return new Response(JSON.stringify({
         success: false,
-        message: 'Method not allowed. Use POST to add items.',
+        message: 'Method not allowed. Use GET or POST to retrieve an item.',
         timestamp: new Date().toISOString(),
       }), {
         status: 405,
@@ -54,14 +52,23 @@ export default {
     }
 
     try {
-      // Parse request body
-      const body: AddItemRequest = await request.json();
-      
-      // Validate required fields
-      if (!body.title || !body.content) {
+      let itemId: string = '';
+
+      if (request.method === 'GET') {
+        // Extract item ID from URL query parameter
+        const url = new URL(request.url);
+        itemId = url.searchParams.get('id') || '';
+      } else if (request.method === 'POST') {
+        // Parse request body for POST requests
+        const body: GetItemRequest = await request.json();
+        itemId = body.id || '';
+      }
+
+      // Validate item ID
+      if (!itemId) {
         return new Response(JSON.stringify({
           success: false,
-          message: 'Title and content are required fields.',
+          message: 'Item ID is required. Provide it as a query parameter (?id=...) for GET or in request body for POST.',
           timestamp: new Date().toISOString(),
         }), {
           status: 400,
@@ -95,51 +102,43 @@ export default {
         password: new URL(redisUrl).password || undefined,
       });
 
-      // Generate unique item ID
-      const itemId = `item:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
+      // Get item from Redis hash
+      const itemData = await redis.hgetall(itemId);
       
-      // Create item object
-      const item = {
-        id: itemId,
-        title: body.title,
-        content: body.content,
-        category: body.category || 'General',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Store item in Redis as a hash
-      await redis.hset(itemId, item);
-      
-      // Add item ID to a set for easy retrieval of all items
-      await redis.sadd('items:all', itemId);
-      
-      // Add item to category-specific set
-      await redis.sadd(`items:category:${item.category}`, itemId);
-      
-      // For search functionality, store searchable text
-      const searchableText = `${item.title} ${item.content}`.toLowerCase();
-      await redis.set(`search:${itemId}`, searchableText);
-
       // Close Redis connection
       redis.close();
 
-      const response: AddItemResponse = {
+      // Check if item exists
+      if (!itemData || Object.keys(itemData).length === 0) {
+        return new Response(JSON.stringify({
+          success: false,
+          message: `Item with ID '${itemId}' not found.`,
+          timestamp: new Date().toISOString(),
+        }), {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const response: GetItemResponse = {
         success: true,
-        message: 'Item added successfully to Redis database.',
+        message: 'Item retrieved successfully.',
         item: {
-          id: itemId,
-          title: item.title,
-          content: item.content,
-          category: item.category,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
+          id: itemData.id as string,
+          title: itemData.title as string,
+          content: itemData.content as string,
+          category: itemData.category as string,
+          createdAt: itemData.createdAt as string,
+          updatedAt: itemData.updatedAt as string,
         },
         timestamp: new Date().toISOString(),
       };
 
-      return new Response(JSON.stringify(response), {
-        status: 201,
+      return new Response(JSON.stringify(response, null, 2), {
+        status: 200,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,
@@ -147,11 +146,11 @@ export default {
       });
 
     } catch (error) {
-      console.error('Error adding item to Redis:', error);
+      console.error('Error retrieving item from Redis:', error);
       
       return new Response(JSON.stringify({
         success: false,
-        message: 'Failed to add item to Redis database.',
+        message: 'Failed to retrieve item from Redis database.',
         error: error.message,
         timestamp: new Date().toISOString(),
       }), {
