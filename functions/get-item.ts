@@ -103,8 +103,23 @@ export default {
       });
 
       // Get item from Redis hash
-      const itemData = await redis.hgetall(itemId);
+      const rawData = await redis.hgetall(itemId);
       
+      // Convert array format to object format
+      // Redis hgetall returns ["field1", "value1", "field2", "value2", ...]
+      const itemData: Record<string, string> = {};
+      if (Array.isArray(rawData)) {
+        for (let i = 0; i < rawData.length; i += 2) {
+          const fieldName = rawData[i] as string;
+          const fieldValue = rawData[i + 1] as string;
+          itemData[fieldName] = fieldValue;
+        }
+      } else {
+        // If it's already an object, use it directly
+        Object.assign(itemData, rawData);
+      }
+      
+   
       // Close Redis connection
       redis.close();
 
@@ -127,12 +142,12 @@ export default {
         success: true,
         message: 'Item retrieved successfully.',
         item: {
-          id: itemData.id as string,
-          title: itemData.title as string,
-          content: itemData.content as string,
-          category: itemData.category as string,
-          createdAt: itemData.createdAt as string,
-          updatedAt: itemData.updatedAt as string,
+          id: (itemData.id || itemData['id'] || itemId) as string,
+          title: (itemData.title || itemData['title'] || '') as string,
+          content: (itemData.content || itemData['content'] || '') as string,
+          category: (itemData.category || itemData['category'] || 'General') as string,
+          createdAt: (itemData.createdAt || itemData['createdAt'] || '') as string,
+          updatedAt: (itemData.updatedAt || itemData['updatedAt'] || '') as string,
         },
         timestamp: new Date().toISOString(),
       };
