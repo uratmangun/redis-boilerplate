@@ -25,3 +25,49 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
+
+# Environment Variables
+# Ignore all .env files except .env.example
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+.env.staging.local
+.env.*.local
+.env.deno
+.env.cloudflare
+.env.vercel
+.env.netlify
+.env.railway
+.env.heroku
+.env.docker
+.env.compose
+.env.dev
+.env.prod
+.env.stage
+.env.preview
+.env.build
+.env.deploy
+.env.ci
+.env.cd
+.env.backup
+.env.bak
+.env.old
+.env.new
+.env.tmp
+.env.temp
+.env.redis
+.env.database
+.env.db
+.env.secrets
+.env.config
+.env.vars
+.env.variables
+
+# Keep .env.example for documentation
+!.env.example
