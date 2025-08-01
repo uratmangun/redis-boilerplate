@@ -1,391 +1,235 @@
-# Cloudflare Pages + Deno Deploy Full-Stack Boilerplate
+# Redis AI Vector Search Boilerplate
 
-A modern, production-ready full-stack application combining React frontend with Deno serverless functions, optimized for Cloudflare Pages and Deno Deploy.
+A modern full-stack application demonstrating AI-powered semantic search using Redis vector similarity, built with React, TypeScript, and Deno. This project showcases how to implement intelligent search functionality with text embeddings and vector databases.
 
-## ✨ Features
+## 🚀 Features
 
-### Frontend
-- **React 19** - Latest version with modern hooks and concurrent features
-- **TypeScript** - Full type safety and better development experience
-- **Vite** - Lightning-fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework for rapid styling
-- **shadcn/ui** - Beautiful, accessible, and customizable UI components
-- **Dark/Light Theme** - Built-in theme switching with system preference detection
-
-### Backend
-- **Deno Runtime** - Modern JavaScript/TypeScript runtime for serverless functions
-- **Function Router** - Automatic routing system for multiple serverless functions
-- **CORS Support** - Pre-configured for cross-origin requests
-- **Hot Reload** - Local development with automatic server restart
-
-### Deployment
-- **Cloudflare Pages** - Global CDN with edge computing capabilities
-- **Deno Deploy** - Serverless functions at the edge
-- **GitHub Actions** - Automated CI/CD pipeline
-- **Environment Sync** - Automatic environment variable synchronization
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js 18+** - For React development
-- **Deno 2.x** - For serverless functions
-- **pnpm** - Package manager (yarn as fallback)
-
-### Installation
-
-1. **Create from template** (recommended):
-```bash
-gh repo create my-project --template uratmangun/cloudflare-deno-kiro --public --clone
-cd my-project
-```
-
-2. **Or clone directly**:
-```bash
-git clone https://github.com/uratmangun/cloudflare-deno-kiro.git
-cd cloudflare-deno-kiro
-```
-
-3. **Install dependencies**:
-```bash
-pnpm install
-```
-
-4. **Start development servers**:
-```bash
-pnpm dev
-```
-
-This starts both:
-- React app at `http://localhost:5173`
-- Deno server at `http://localhost:8000`
-
-### 🛠 Available Scripts
-
-```bash
-# Start both React and Deno servers concurrently
-pnpm dev
-
-# Start only React development server
-pnpm dev:vite
-
-# Start only Deno server
-pnpm dev:deno
-
-# Build React app for production
-pnpm build
-
-# Preview production build
-pnpm preview
-
-# Lint code
-pnpm lint
-```
-
-### Deno Commands
-
-```bash
-# Run Deno server directly
-deno task dev
-
-# Run main router
-deno task main
-
-# Test individual function
-deno task function
-```
-
-## 📁 Project Structure
-
-```
-├── src/                     # React frontend
-│   ├── components/
-│   │   ├── ui/             # shadcn/ui components
-│   │   └── ThemeToggle.tsx # Theme switching component
-│   ├── contexts/
-│   │   └── ThemeContext.tsx # Theme context provider
-│   ├── lib/
-│   │   └── utils.ts        # Utility functions
-│   ├── App.tsx             # Main application
-│   └── main.tsx            # React entry point
-│
-├── functions/              # Deno serverless functions
-│   └── hello.ts           # Example function
-│
-├── main.ts                # Deno function router
-├── server.ts              # Local development server
-├── deno.json              # Deno configuration
-│
-├── .github/workflows/     # CI/CD pipeline
-│   └── deploy.yml         # Automated deployment
-│
-├── .kiro/specs/           # Project specifications
-│   └── cloudflare-deno-integration/
-│
-├── package.json           # Node.js dependencies
-├── vite.config.ts         # Vite configuration
-└── netlify.toml          # Legacy Netlify config
-```
-
-## 🎨 Frontend Features
-
-### UI Components
-- **shadcn/ui** - Pre-built accessible components
-- **Button** - Multiple variants and sizes
-- **Card** - Structured content containers
-- **Theme Toggle** - Dark/light mode switching
-- **Lucide Icons** - Beautiful icon library
-
-### Serverless Function Integration
-- **API Client** - Automatic endpoint detection
-- **Error Handling** - Graceful fallbacks and error states
-- **Loading States** - User feedback during API calls
-- **CORS Support** - Cross-origin request handling
-
-### Adding More Functions
-
-1. Create a new file in `functions/` directory:
-```typescript
-// functions/example.ts
-export default {
-  async fetch(request: Request): Promise<Response> {
-    return new Response(JSON.stringify({ message: "Hello!" }), {
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-};
-```
-
-2. Register in `main.ts`:
-```typescript
-import exampleFunction from './functions/example.ts';
-
-const functions = {
-  hello: helloFunction,
-  example: exampleFunction, // Add here
-};
-```
-
-3. Access at `/api/example` or `/example`
-
-## 🚀 Deployment
-
-### Automated Deployment (Recommended)
-
-The project includes a complete CI/CD pipeline using GitHub Actions:
-
-1. **Set up GitHub Secrets** (see [DEPLOYMENT_SECRETS.md](DEPLOYMENT_SECRETS.md)):
-   - `DENO_DEPLOY_TOKEN` - From [dash.deno.com](https://dash.deno.com)
-   - `CLOUDFLARE_API_TOKEN` - From Cloudflare dashboard
-   - `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
-   - `ADMIN_TOKEN` - GitHub token (optional, for repo updates)
-
-2. **Push to main branch**:
-```bash
-git push origin main
-```
-
-3. **Automatic deployment**:
-   - Deno functions → Deno Deploy
-   - React app → Cloudflare Pages
-   - Environment variables synced automatically
-
-### Manual Deployment
-
-#### Deno Deploy
-```bash
-# Install deployctl
-deno install -A --global jsr:@deno/deployctl
-
-# Deploy function
-deployctl deploy --project=your-project main.ts
-```
-
-#### Cloudflare Pages
-```bash
-# Build React app
-pnpm build
-
-# Deploy to Cloudflare Pages (using Wrangler)
-npx wrangler pages deploy dist --project-name=your-project
-```
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-#### Development
-Create `.env.local` for local development:
-```bash
-VITE_DENO_API_URL=http://localhost:8000
-```
-
-#### Production
-Set in Cloudflare Pages dashboard:
-- `VITE_DENO_API_URL` - Your Deno Deploy URL (auto-set by GitHub Actions)
-
-### Theming
-
-The app includes a complete theming system:
-
-- **CSS Variables** - Defined in `src/index.css`
-- **Theme Context** - React context for theme state
-- **System Detection** - Automatic dark/light mode detection
-- **Theme Toggle** - User-controlled theme switching
-
-### Path Aliases
-
-Clean imports using the `@/` alias:
-
-```typescript
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { ThemeProvider } from '@/contexts/ThemeContext'
-```
+- **AI Semantic Search**: Natural language queries powered by Google GenAI embeddings
+- **Vector Similarity**: Redis-based vector search with cosine similarity
+- **Real-time UI**: Modern React interface with dark/light theme support
+- **Serverless Ready**: Deno Deploy and Cloudflare Pages compatible
+- **Full CRUD Operations**: Add, search, retrieve, and delete items
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS
+- **Type Safety**: Full TypeScript implementation across frontend and backend
 
 ## 🛠 Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Frontend Framework** | React 19 |
-| **Backend Runtime** | Deno 2.x |
-| **Language** | TypeScript |
-| **Build Tool** | Vite |
-| **Styling** | Tailwind CSS |
-| **UI Components** | shadcn/ui + Radix UI |
-| **Icons** | Lucide React |
-| **Frontend Hosting** | Cloudflare Pages |
-| **Backend Hosting** | Deno Deploy |
-| **CI/CD** | GitHub Actions |
-| **Package Manager** | pnpm |
+### Frontend
+- **React 19** - Modern UI library with latest features
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **Vite** - Fast build tool and dev server
+- **React Router** - Client-side routing
+- **Radix UI** - Accessible component primitives
 
-## 🧪 Local Development
+### Backend
+- **Deno** - Modern JavaScript/TypeScript runtime
+- **Redis** - Vector database and caching
+- **Google GenAI** - Text embedding generation
+- **Serverless Functions** - Modular API architecture
 
-### Development Workflow
+### Development Tools
+- **ESLint** - Code linting
+- **Concurrently** - Parallel script execution
+- **pnpm** - Fast package manager
 
-1. **Start development servers**:
+## 📦 Installation
+
+### Prerequisites
+- [Deno](https://deno.land/) (latest version)
+- [Node.js](https://nodejs.org/) (18+ for frontend)
+- [pnpm](https://pnpm.io/) (recommended) or yarn
+- Redis instance (local or cloud)
+- Google AI API key
+
+### Setup Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd redis-ai-vector-search
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
+   REDIS_URL=redis://localhost:6379
+   GOOGLE_AI_API_KEY=your_google_ai_api_key
+   ```
+
+4. **Start Redis** (if running locally)
+   ```bash
+   # Using Docker
+   docker run -d -p 6379:6379 redis:alpine
+   
+   # Or install Redis locally
+   # macOS: brew install redis && brew services start redis
+   # Ubuntu: sudo apt install redis-server
+   ```
+
+## 🚀 Usage
+
+### Development Mode
+
+Start both frontend and backend in development mode:
+
 ```bash
-pnpm dev  # Starts both React (5173) and Deno (8000)
+pnpm dev
 ```
 
-2. **Test the integration**:
-   - Open `http://localhost:5173`
-   - Click "Call Serverless Function" button
-   - Verify the API call works
+This runs:
+- Frontend (Vite): http://localhost:5173
+- Backend (Deno): http://localhost:8000
 
-3. **Add new functions**:
-   - Create in `functions/` directory
-   - Register in `main.ts`
-   - Test locally before deploying
+### Individual Services
 
-### Code Style Guidelines
-
-#### Frontend (React)
-- Use TypeScript for all components
-- Follow shadcn/ui patterns for consistency
-- Use the `cn()` utility for conditional classes
-- Implement proper error boundaries
-
-#### Backend (Deno)
-- Export default object with `fetch` method
-- Include CORS headers for cross-origin requests
-- Use proper TypeScript types
-- Handle errors gracefully
-
-### Function Structure
-
-```typescript
-// functions/example.ts
-export default {
-  async fetch(request: Request): Promise<Response> {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 200, headers: corsHeaders });
-    }
-
-    // Your function logic here
-    const data = { message: 'Hello from Deno!' };
-
-    return new Response(JSON.stringify(data), {
-      headers: { 'Content-Type': 'application/json', ...corsHeaders }
-    });
-  }
-};
+**Frontend only:**
+```bash
+pnpm dev:vite
 ```
 
-## 🔧 Troubleshooting
+**Backend only:**
+```bash
+pnpm dev:deno
+```
 
-### Common Issues
+### Production Build
 
-#### Function not found (404)
-- Verify function is registered in `main.ts`
-- Check function export format
-- Ensure Deno server is running on port 8000
+```bash
+pnpm build
+```
 
-#### CORS errors
-- Functions include CORS headers by default
-- Check browser network tab for actual error
-- Verify API endpoint URL is correct
+## 🏗 Project Structure
 
-#### Build failures
-- Check Node.js version (18+ required)
-- Clear `node_modules` and reinstall: `rm -rf node_modules && pnpm install`
-- Verify TypeScript compilation: `pnpm build`
+```
+├── src/                    # React frontend source
+│   ├── components/         # React components
+│   │   ├── ui/            # Reusable UI components
+│   │   ├── AISearchPage.tsx
+│   │   └── HomePage.tsx
+│   ├── contexts/          # React contexts
+│   └── constants/         # API configuration
+├── functions/             # Deno serverless functions
+│   ├── add-item.ts       # Add new items
+│   ├── search-items.ts   # Vector similarity search
+│   ├── get-item.ts       # Retrieve specific items
+│   ├── delete-item.ts    # Remove items
+│   └── init-index.ts     # Initialize Redis index
+├── utils/                # Shared utilities
+│   ├── redis-index.ts    # Redis index management
+│   └── text-embeddings.ts # AI embedding generation
+├── main.ts               # Deno Deploy entry point
+├── server.ts             # Local development server
+└── public/               # Static assets
+```
 
-#### Deployment issues
-- Check GitHub Secrets are set correctly
-- Verify Cloudflare API token permissions
-- Check GitHub Actions logs for specific errors
+## 🔧 Configuration
 
-### Getting Help
+### Redis Providers
 
-1. Check the [GitHub Issues](https://github.com/uratmangun/cloudflare-deno-kiro/issues)
-2. Review the [deployment documentation](DEPLOYMENT_SECRETS.md)
-3. Check Cloudflare and Deno Deploy documentation
+The application supports various Redis providers:
+
+- **Local Development**: Redis on localhost
+- **Upstash**: Serverless Redis (recommended for Deno Deploy)
+- **Redis Cloud**: Managed Redis service
+- **Railway**: Redis hosting platform
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `REDIS_URL` | Redis connection string | Yes |
+| `GOOGLE_AI_API_KEY` | Google GenAI API key | Yes |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/init-index` | POST | Initialize Redis search index |
+| `/api/add-item` | POST | Add new searchable item |
+| `/api/search-items` | GET/POST | Semantic search with embeddings |
+| `/api/get-item` | GET | Retrieve item by ID |
+| `/api/delete-item` | DELETE | Remove item from database |
+
+## 🎯 How It Works
+
+### Vector Search Process
+
+1. **Text Embedding**: User queries are converted to 768-dimensional vectors using Google GenAI
+2. **Vector Storage**: Items are stored in Redis with their text embeddings
+3. **Similarity Search**: Cosine similarity calculates relevance between query and stored vectors
+4. **Ranked Results**: Items are returned sorted by similarity score
+
+### Search Types
+
+- **Title Search**: Search only in item titles
+- **Content Search**: Search only in item content  
+- **Combined Search**: Search across title and content (default)
+
+## 🚀 Deployment
+
+### Deno Deploy
+
+1. Connect your GitHub repository to Deno Deploy
+2. Set environment variables in the dashboard
+3. Deploy using `main.ts` as the entry point
+
+### Cloudflare Pages
+
+1. Build the frontend: `pnpm build`
+2. Deploy the `dist` folder to Cloudflare Pages
+3. Configure environment variables for the backend functions
+
+### Self-Hosted
+
+1. Build the project: `pnpm build`
+2. Run the Deno server: `deno task start`
+3. Serve the frontend from the `dist` folder
+
+## 🧪 Development Workflow
+
+This project follows spec-driven development using Kiro AI specifications:
+
+- **Requirements**: User stories and acceptance criteria
+- **Design**: Technical architecture decisions
+- **Tasks**: Discrete implementation steps
+
+See `.kiro/specs/` for detailed development specifications.
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Test locally with `pnpm dev`
-4. Commit changes: `git commit -m 'Add amazing feature'`
-5. Push to branch: `git push origin feature/amazing-feature`
-6. Open a Pull Request
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Features in Detail
+## 🙏 Acknowledgments
 
-### Full-Stack Integration
-- **Seamless API calls** between React frontend and Deno backend
-- **Automatic endpoint detection** for development and production
-- **Environment-aware configuration** with fallback strategies
+- [Redis](https://redis.io/) for vector search capabilities
+- [Google GenAI](https://ai.google.dev/) for text embeddings
+- [Deno](https://deno.land/) for the modern runtime
+- [React](https://react.dev/) for the UI framework
 
-### Developer Experience
-- **Hot reload** for both frontend and backend during development
-- **TypeScript everywhere** for type safety across the stack
-- **Modern tooling** with Vite, ESLint, and Deno's built-in formatter
+## 📚 Learn More
 
-### Production Ready
-- **Global CDN** deployment with Cloudflare Pages
-- **Edge computing** with Deno Deploy serverless functions
-- **Automated CI/CD** with GitHub Actions
-- **Environment synchronization** between services
-
-### Scalability
-- **Serverless architecture** scales automatically with demand
-- **Edge deployment** reduces latency worldwide
-- **Stateless functions** enable horizontal scaling
+- [Redis Vector Similarity Search Guide](guide/redis-vector-similarity-search.md)
+- [Deno Deploy Documentation](https://deno.com/deploy/docs)
+- [Google GenAI API Reference](https://ai.google.dev/docs)
 
 ---
 
-**🚀 Ready for production** • **⚡ Lightning fast** • **🌍 Global deployment** • **🔧 Fully customizable**
-
-Built with modern web technologies for the edge computing era.
+Built with ❤️ using modern web technologies and AI-powered search.
