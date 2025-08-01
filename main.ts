@@ -1,17 +1,17 @@
 // Main entry point for Deno Deploy - routes to all functions
-import helloFunction from './functions/hello.ts';
 import addItemFunction from './functions/add-item.ts';
-import searchItemsFunction from './functions/search-items.ts';
 import getItemFunction from './functions/get-item.ts';
 import deleteItemFunction from './functions/delete-item.ts';
+import searchItemsFunction from './functions/search-items.ts';
+import initIndexFunction from './functions/init-index.ts';
 
 // Function registry - add new functions here
 const functions = {
-  hello: helloFunction,
   'add-item': addItemFunction,
-  'search-items': searchItemsFunction,
   'get-item': getItemFunction,
   'delete-item': deleteItemFunction,
+  'search-items': searchItemsFunction,
+  'init-index': initIndexFunction,
 };
 
 export default {

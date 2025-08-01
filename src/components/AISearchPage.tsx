@@ -34,29 +34,7 @@ interface AISearchPageProps {
 
 export function AISearchPage({ onBack }: AISearchPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<SearchItem[]>([
-    {
-      id: '1',
-      title: 'Redis Vector Search Documentation',
-      content: 'Learn how to implement semantic search using Redis Vector Search with AI embeddings...',
-      category: 'Documentation',
-      relevanceScore: 0.95
-    },
-    {
-      id: '2',
-      title: 'Building Chat Applications with Redis',
-      content: 'A comprehensive guide to creating real-time chat applications using Redis Pub/Sub...',
-      category: 'Tutorial',
-      relevanceScore: 0.87
-    },
-    {
-      id: '3',
-      title: 'AI-Powered Search Best Practices',
-      content: 'Optimize your semantic search implementation with these proven techniques...',
-      category: 'Best Practices',
-      relevanceScore: 0.82
-    }
-  ])
+  const [searchResults, setSearchResults] = useState<SearchItem[]>([])
   const [newItemTitle, setNewItemTitle] = useState('')
   const [newItemContent, setNewItemContent] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -69,6 +47,8 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
   const [fetchedItem, setFetchedItem] = useState<SearchItem | null>(null)
   const [isGettingItem, setIsGettingItem] = useState(false)
   const [isDeletingItem, setIsDeletingItem] = useState(false)
+  const [isInitializingIndex, setIsInitializingIndex] = useState(false)
+  const [indexStatus, setIndexStatus] = useState<'unknown' | 'exists' | 'missing'>('unknown')
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -86,8 +66,16 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
 
       const result = await response.json();
 
-      if (result.success) {
-        setSearchResults(result.items || []);
+      if (result.success && result.results) {
+        // Map the API response to the expected SearchItem format
+        const mappedResults: SearchItem[] = result.results.items.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          content: item.content,
+          category: item.category,
+          relevanceScore: item.score || 0
+        }));
+        setSearchResults(mappedResults);
       } else {
         console.error('Search failed:', result.message);
         // Fallback to mock results if Redis search fails
@@ -131,6 +119,26 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
     }
 
     try {
+      // First, try to initialize the index if it doesn't exist
+      if (indexStatus !== 'exists') {
+        try {
+          const initResponse = await fetch(API_ENDPOINTS.INIT_INDEX, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          const initResult = await initResponse.json();
+          if (initResult.success) {
+            setIndexStatus('exists');
+            console.log('✅ Index initialized automatically before adding item');
+          }
+        } catch (initError) {
+          console.warn('⚠️ Could not initialize index, proceeding with add-item anyway:', initError);
+        }
+      }
+
       // Call the real Redis backend API
       const response = await fetch(API_ENDPOINTS.ADD_ITEM, {
         method: 'POST',
@@ -241,8 +249,50 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
     }
   };
 
+  const handleInitializeIndex = async () => {
+    setIsInitializingIndex(true);
+    
+    try {
+      const response = await fetch(API_ENDPOINTS.INIT_INDEX, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIndexStatus('exists');
+        setNotification({
+          type: 'success',
+          message: result.indexExists 
+            ? 'Redis search index already exists and is ready!' 
+            : 'Redis search index created successfully! You can now use vector search.',
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      } else {
+        setIndexStatus('missing');
+        setNotification({
+          type: 'error',
+          message: result.message || 'Failed to initialize Redis search index',
+        });
+        setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+      }
+    } catch (error) {
+      console.error('Error initializing index:', error);
+      setIndexStatus('missing');
+      setNotification({
+        type: 'error',
+        message: 'Network error occurred while initializing index',
+      });
+      setTimeout(() => setNotification({ type: null, message: '' }), 5000);
+    } finally {
+      setIsInitializingIndex(false);
+    }
+  };
+
   const handleDeleteItem = async (itemId: string) => {
-    console.log('🗑️ Delete button clicked for item ID:', itemId);
     
     if (!itemId.trim()) {
       console.error('❌ Invalid item ID');
@@ -363,6 +413,46 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
           </div>
         )}
 
+        {/* Initialize Index Section */}
+        <Card className="mb-8 border-orange-200 dark:border-orange-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+              <Bot className="h-5 w-5" />
+              Redis Search Index Setup
+            </CardTitle>
+            <CardDescription className="text-orange-600 dark:text-orange-400">
+              Initialize the Redis search index before using vector similarity search
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={handleInitializeIndex} 
+                disabled={isInitializingIndex}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                {isInitializingIndex ? 'Initializing...' : 'Initialize Search Index'}
+              </Button>
+              {indexStatus === 'exists' && (
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Index Ready</span>
+                </div>
+              )}
+              {indexStatus === 'missing' && (
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <XCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Index Not Found</span>
+                </div>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-3">
+              <strong>Important:</strong> You must initialize the search index before adding items or searching. 
+              This creates the necessary Redis indexes for vector similarity search.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Add Item Section */}
         <Card className="mb-8">
           <CardHeader>
@@ -371,7 +461,7 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
               Add New Item
             </CardTitle>
             <CardDescription>
-              Add content to the searchable knowledge base
+              Add content to the searchable knowledge base (requires initialized index)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

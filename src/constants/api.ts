@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   ADD_ITEM: `${API_BASE_URL}/functions/add-item`,
   GET_ITEM: `${API_BASE_URL}/functions/get-item`,
   DELETE_ITEM: `${API_BASE_URL}/functions/delete-item`,
+  INIT_INDEX: `${API_BASE_URL}/functions/init-index`,
 } as const;
 
 // Helper function to build API URLs with query parameters

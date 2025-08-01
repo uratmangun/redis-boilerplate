@@ -5,16 +5,30 @@ This project uses GitHub Actions to automatically deploy to both Deno Deploy and
 ## Required GitHub Secrets
 
 ### For Deno Deploy
-1. **`DENO_DEPLOY_TOKEN`**
+1. **`DENO_DEPLOY_TOKEN`** *(Required)*
    - Go to [dash.deno.com](https://dash.deno.com)
    - Navigate to Account Settings → Access Tokens
    - Create a new access token
    - Copy the token and add it as a GitHub secret
 
+2. **`REDIS_URL`** *(Required)*
+   - Your Redis database connection URL
+   - Format: `redis://[username:password@]host:port[/database]`
+   - Examples:
+     - Local: `redis://localhost:6379`
+     - Upstash: `redis://username:password@your-redis-url.upstash.io:6379`
+     - Redis Cloud: `redis://username:password@redis-12345.c1.us-east1-1.gce.cloud.redislabs.com:12345`
+
+3. **`GOOGLE_AI_API_KEY`** *(Required)*
+   - Google AI API key for text embeddings
+   - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Create a new API key
+   - Copy the key and add it as a GitHub secret
+
 **Note**: The Deno project name will automatically use your GitHub repository name, so no `DENO_PROJECT_NAME` secret is needed!
 
 ### For Cloudflare Pages
-3. **`CLOUDFLARE_API_TOKEN`**
+4. **`CLOUDFLARE_API_TOKEN`** *(Required)*
    - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
    - Create a custom token with these permissions:
      - Zone:Zone:Read
@@ -22,13 +36,26 @@ This project uses GitHub Actions to automatically deploy to both Deno Deploy and
      - Account:Cloudflare Pages:Edit
    - Copy the token and add it as a GitHub secret
 
-4. **`CLOUDFLARE_ACCOUNT_ID`**
+5. **`CLOUDFLARE_ACCOUNT_ID`** *(Required)*
    - Found in your Cloudflare dashboard sidebar
    - Or get it from the URL when viewing your account
 
-4. **`ADMIN_TOKEN`** (Optional)
+### Optional Secrets
+6. **`ADMIN_TOKEN`** *(Optional)*
    - GitHub Personal Access Token for updating repository settings
    - Only needed if you want the workflow to update the repository's website URL
+   - Go to GitHub Settings → Developer settings → Personal access tokens
+   - Create token with `repo` scope
+
+7. **`VITE_PRIVY_APP_ID`** *(Optional)*
+   - Privy App ID for authentication (if using Privy)
+   - Get from [Privy Dashboard](https://dashboard.privy.io/)
+
+8. **`VITE_PRIVY_CLIENT_ID`** *(Optional)*
+   - Privy Client ID for authentication (if using Privy)
+   - Get from [Privy Dashboard](https://dashboard.privy.io/)
+
+**Note**: `GITHUB_TOKEN` is automatically provided by GitHub Actions and doesn't need to be added manually.
 
 ## How to Add GitHub Secrets
 

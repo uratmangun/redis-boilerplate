@@ -102,22 +102,18 @@ export default {
       });
 
       // First, get the item to return its data before deletion
-      const rawData = await redis.hgetall(itemId);
+      const itemDataArray = await redis.hgetall(itemId);
+      let itemData: any = null;
       
-      // Convert array format to object format (same as get-item.ts)
-      const itemData: Record<string, string> = {};
-      if (Array.isArray(rawData)) {
-        for (let i = 0; i < rawData.length; i += 2) {
-          const fieldName = rawData[i] as string;
-          const fieldValue = rawData[i + 1] as string;
-          itemData[fieldName] = fieldValue;
+      if (itemDataArray && itemDataArray.length > 0) {
+        // Convert Redis array response to object
+        itemData = {};
+        for (let i = 0; i < itemDataArray.length; i += 2) {
+          itemData[itemDataArray[i]] = itemDataArray[i + 1];
         }
-      } else {
-        // If it's already an object, use it directly
-        Object.assign(itemData, rawData);
       }
       
-      if (!itemData || Object.keys(itemData).length === 0) {
+      if (!itemData) {
         await redis.quit();
         return new Response(JSON.stringify({
           success: false,

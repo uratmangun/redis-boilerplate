@@ -1,27 +1,30 @@
-// Deno function to search items in Redis database
+// Deno function to search items using vector similarity (cosine similarity)
 import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
+import { generateTextEmbeddings, float32Buffer } from '../utils/text-embeddings.ts';
+import { ITEMS_INDEX_KEY } from '../utils/redis-index.ts';
 
-interface SearchRequest {
-  query?: string;
-  category?: string;
-  limit?: number;
+interface SearchItemsRequest {
+  query: string;
+  limit?: number; // Maximum number of results (default: 5)
+  searchType?: 'title' | 'content' | 'combined'; // Which embeddings to search (default: combined)
 }
 
-interface SearchItem {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  createdAt: string;
-  updatedAt: string;
-  relevanceScore: number;
-}
-
-interface SearchResponse {
+interface SearchItemsResponse {
   success: boolean;
   message: string;
-  items: SearchItem[];
-  totalCount: number;
+  results?: {
+    total: number;
+    items: Array<{
+      id: string;
+      title: string;
+      content: string;
+      category: string;
+      createdAt: string;
+      updatedAt: string;
+      expiresAt: string;
+      score: number; // Similarity score (higher = more similar)
+    }>;
+  };
   timestamp: string;
 }
 
@@ -47,8 +50,6 @@ export default {
       return new Response(JSON.stringify({
         success: false,
         message: 'Method not allowed. Use GET or POST to search items.',
-        items: [],
-        totalCount: 0,
         timestamp: new Date().toISOString(),
       }), {
         status: 405,
@@ -60,18 +61,38 @@ export default {
     }
 
     try {
-      // Parse search parameters
-      let searchParams: SearchRequest = {};
-      
-      if (request.method === 'POST') {
-        searchParams = await request.json();
-      } else {
+      let searchParams: SearchItemsRequest;
+
+      // Parse request parameters
+      if (request.method === 'GET') {
         const url = new URL(request.url);
         searchParams = {
-          query: url.searchParams.get('query') || undefined,
-          category: url.searchParams.get('category') || undefined,
-          limit: parseInt(url.searchParams.get('limit') || '50'),
+          query: url.searchParams.get('query') || '',
+          limit: parseInt(url.searchParams.get('limit') || '5'),
+          searchType: (url.searchParams.get('searchType') as 'title' | 'content' | 'combined') || 'combined',
         };
+      } else {
+        const body = await request.json();
+        searchParams = {
+          query: body.query || '',
+          limit: body.limit || 5,
+          searchType: body.searchType || 'combined',
+        };
+      }
+
+      // Validate required fields
+      if (!searchParams.query.trim()) {
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'Query parameter is required.',
+          timestamp: new Date().toISOString(),
+        }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
       }
 
       // Get Redis connection URL from environment
@@ -80,8 +101,6 @@ export default {
         return new Response(JSON.stringify({
           success: false,
           message: 'Redis connection not configured. Please set REDIS_URL environment variable.',
-          items: [],
-          totalCount: 0,
           timestamp: new Date().toISOString(),
         }), {
           status: 500,
@@ -99,77 +118,128 @@ export default {
         password: new URL(redisUrl).password || undefined,
       });
 
-      let itemIds: string[] = [];
-
-      // Get item IDs based on search criteria
-      if (searchParams.category) {
-        // Search by category
-        itemIds = await redis.smembers(`items:category:${searchParams.category}`);
-      } else {
-        // Get all items
-        itemIds = await redis.smembers('items:all');
+      // Generate query embeddings
+      const queryEmbedding = await generateTextEmbeddings(searchParams.query);
+      if (queryEmbedding.error) {
+        redis.close();
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'Failed to generate embeddings for search query.',
+          timestamp: new Date().toISOString(),
+        }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
       }
 
-      // Retrieve item details
-      const items: SearchItem[] = [];
-      
-      for (const itemId of itemIds) {
-        const itemData = await redis.hgetall(itemId);
-        
-        if (itemData && Object.keys(itemData).length > 0) {
-          let relevanceScore = 1.0;
-          
-          // Calculate relevance score if query is provided
-          if (searchParams.query) {
-            const searchableText = await redis.get(`search:${itemId}`);
-            if (searchableText) {
-              const queryLower = searchParams.query.toLowerCase();
-              const textLower = searchableText.toLowerCase();
-              
-              // Simple relevance scoring
-              if (textLower.includes(queryLower)) {
-                const titleMatch = itemData.title?.toLowerCase().includes(queryLower);
-                const exactMatch = textLower === queryLower;
-                
-                if (exactMatch) relevanceScore = 1.0;
-                else if (titleMatch) relevanceScore = 0.9;
-                else relevanceScore = 0.7;
-              } else {
-                // Skip items that don't match the query
-                continue;
-              }
-            }
+      // Use basic Redis operations for vector similarity search (compatible with basic Redis)
+      let embeddingField: string;
+      switch (searchParams.searchType) {
+        case 'title':
+          embeddingField = 'titleEmbeddings';
+          break;
+        case 'content':
+          embeddingField = 'contentEmbeddings';
+          break;
+        default:
+          embeddingField = 'combinedEmbeddings';
+      }
+
+      // Get all item keys (scan for item:* pattern)
+      const itemKeys: string[] = [];
+      let cursor = '0';
+      do {
+        const scanResult = await redis.scan(cursor, { pattern: 'item:*', count: 100 });
+        cursor = scanResult[0];
+        itemKeys.push(...scanResult[1]);
+      } while (cursor !== '0');
+
+      // Calculate similarity scores for each item
+      const items: Array<{
+        id: string;
+        title: string;
+        content: string;
+        category: string;
+        createdAt: string;
+        updatedAt: string;
+        expiresAt: string;
+        score: number;
+      }> = [];
+
+      for (const itemKey of itemKeys) {
+        try {
+          // Get item data from Redis hash
+          const itemDataArray = await redis.hgetall(itemKey);
+          if (!itemDataArray || itemDataArray.length === 0) continue;
+
+          // Convert Redis array response to object
+          const itemData: any = {};
+          for (let i = 0; i < itemDataArray.length; i += 2) {
+            itemData[itemDataArray[i]] = itemDataArray[i + 1];
           }
 
-          const item: SearchItem = {
-            id: itemData.id || itemId,
+          // Parse stored embeddings
+          const storedEmbeddingsStr = itemData[embeddingField];
+          if (!storedEmbeddingsStr) continue;
+
+          let storedEmbeddings: number[];
+          try {
+            storedEmbeddings = JSON.parse(storedEmbeddingsStr);
+          } catch {
+            continue; // Skip items with invalid embeddings
+          }
+
+          // Calculate cosine similarity
+          let dotProduct = 0;
+          let queryMagnitude = 0;
+          let storedMagnitude = 0;
+
+          for (let i = 0; i < queryEmbedding.embeddings.length && i < storedEmbeddings.length; i++) {
+            dotProduct += queryEmbedding.embeddings[i] * storedEmbeddings[i];
+            queryMagnitude += queryEmbedding.embeddings[i] * queryEmbedding.embeddings[i];
+            storedMagnitude += storedEmbeddings[i] * storedEmbeddings[i];
+          }
+
+          queryMagnitude = Math.sqrt(queryMagnitude);
+          storedMagnitude = Math.sqrt(storedMagnitude);
+
+          const similarity = queryMagnitude && storedMagnitude ? 
+            dotProduct / (queryMagnitude * storedMagnitude) : 0;
+
+          items.push({
+            id: itemKey,
             title: itemData.title || '',
             content: itemData.content || '',
-            category: itemData.category || 'General',
-            createdAt: itemData.createdAt || new Date().toISOString(),
-            updatedAt: itemData.updatedAt || new Date().toISOString(),
-            relevanceScore,
-          };
-
-          items.push(item);
+            category: itemData.category || '',
+            createdAt: itemData.createdAt || '',
+            updatedAt: itemData.updatedAt || '',
+            expiresAt: itemData.expiresAt || '',
+            score: similarity,
+          });
+        } catch (itemError) {
+          console.warn(`Error processing item ${itemKey}:`, itemError);
+          continue;
         }
       }
 
-      // Sort by relevance score (highest first)
-      items.sort((a, b) => b.relevanceScore - a.relevanceScore);
-
-      // Apply limit
-      const limit = searchParams.limit || 50;
-      const limitedItems = items.slice(0, limit);
+      // Sort by similarity score (descending) and limit results
+      const sortedItems = items
+        .sort((a, b) => b.score - a.score)
+        .slice(0, searchParams.limit);
 
       // Close Redis connection
       redis.close();
 
-      const response: SearchResponse = {
+      const response: SearchItemsResponse = {
         success: true,
-        message: `Found ${limitedItems.length} items${searchParams.query ? ` matching "${searchParams.query}"` : ''}.`,
-        items: limitedItems,
-        totalCount: limitedItems.length,
+        message: `Found ${sortedItems.length} items matching your query using ${searchParams.searchType} embeddings.`,
+        results: {
+          total: sortedItems.length,
+          items: sortedItems,
+        },
         timestamp: new Date().toISOString(),
       };
 
@@ -182,14 +252,12 @@ export default {
       });
 
     } catch (error) {
-      console.error('Error searching items in Redis:', error);
+      console.error('Error searching items:', error);
       
       return new Response(JSON.stringify({
         success: false,
         message: 'Failed to search items in Redis database.',
         error: error.message,
-        items: [],
-        totalCount: 0,
         timestamp: new Date().toISOString(),
       }), {
         status: 500,

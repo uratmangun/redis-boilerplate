@@ -75,10 +75,12 @@ jobs:
             --token="${{ secrets.DENO_DEPLOY_TOKEN }}" \
             --exclude=node_modules,dist,build,.git,src,public,*.md \
             --env=REDIS_URL="${{ secrets.REDIS_URL }}" \
+            --env=GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
             main.ts
         env:
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
 
       - name: Get Deno Deploy URL
         id: deno_url

@@ -1,10 +1,12 @@
-// Deno function to add items to Redis database
+// Deno function to add items to Redis database with vector embeddings
 import { connect } from "https://deno.land/x/redis@v0.32.3/mod.ts";
+import { generateTextEmbeddings } from '../utils/text-embeddings.ts';
 
 interface AddItemRequest {
   title: string;
   content: string;
   category?: string;
+  ttlSeconds?: number; // Time to live in seconds (optional, defaults to 1 day)
 }
 
 interface AddItemResponse {
@@ -17,6 +19,7 @@ interface AddItemResponse {
     category: string;
     createdAt: string;
     updatedAt: string;
+    expiresAt: string; // ISO string of expiration time (required)
   };
   timestamp: string;
 }
@@ -98,7 +101,33 @@ export default {
       // Generate unique item ID
       const itemId = `item:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
       
-      // Create item object
+      // Set TTL to provided value or default to 1 day (86400 seconds)
+      const ttlSeconds = body.ttlSeconds || 86400; // Default: 24 hours
+      
+      // Calculate expiration time (always required now)
+      const expiresAt = new Date(Date.now() + (ttlSeconds * 1000)).toISOString();
+
+      // Generate vector embeddings for title and content
+      const titleEmbedding = await generateTextEmbeddings(body.title);
+      const contentEmbedding = await generateTextEmbeddings(body.content);
+      const combinedText = `${body.title} ${body.content}`;
+      const combinedEmbedding = await generateTextEmbeddings(combinedText);
+
+      if (titleEmbedding.error || contentEmbedding.error || combinedEmbedding.error) {
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'Failed to generate embeddings for text content.',
+          timestamp: new Date().toISOString(),
+        }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
+      }
+
+      // Create item object with embeddings
       const item = {
         id: itemId,
         title: body.title,
@@ -106,27 +135,39 @@ export default {
         category: body.category || 'General',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        expiresAt, // Always included now
+        titleEmbeddings: titleEmbedding.embeddings,
+        contentEmbeddings: contentEmbedding.embeddings,
+        combinedEmbeddings: combinedEmbedding.embeddings,
       };
 
-      // Store item in Redis as a hash
-      await redis.hset(itemId, item);
+      // Store item in Redis using hash operations (compatible with basic Redis)
+      // Convert embeddings arrays to strings for storage
+      const itemData = {
+        id: itemId,
+        title: body.title,
+        content: body.content,
+        category: body.category || 'General',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        expiresAt,
+        titleEmbeddings: JSON.stringify(titleEmbedding.embeddings),
+        contentEmbeddings: JSON.stringify(contentEmbedding.embeddings),
+        combinedEmbeddings: JSON.stringify(combinedEmbedding.embeddings),
+      };
       
-      // Add item ID to a set for easy retrieval of all items
-      await redis.sadd('items:all', itemId);
+      // Use HSET to store the item data
+      await redis.hset(itemId, itemData);
       
-      // Add item to category-specific set
-      await redis.sadd(`items:category:${item.category}`, itemId);
+      // Set expiration (always required now)
+      await redis.expire(itemId, ttlSeconds);
       
-      // For search functionality, store searchable text
-      const searchableText = `${item.title} ${item.content}`.toLowerCase();
-      await redis.set(`search:${itemId}`, searchableText);
-
       // Close Redis connection
       redis.close();
 
       const response: AddItemResponse = {
         success: true,
-        message: 'Item added successfully to Redis database.',
+        message: `Item added successfully to Redis database with ${ttlSeconds}s expiration.`,
         item: {
           id: itemId,
           title: item.title,
@@ -134,6 +175,7 @@ export default {
           category: item.category,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
+          expiresAt: item.expiresAt, // Always included now
         },
         timestamp: new Date().toISOString(),
       };
