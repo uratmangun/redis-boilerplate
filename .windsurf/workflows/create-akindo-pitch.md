@@ -1,6 +1,7 @@
 ---
 description: Monitors project files and automatically generates or updates a comprehensive AKINDO pitch document with project details
 ---
+
 Please create or update AKINDO.txt pitch document in the PITCH directory. Create a text file that includes the following sections:
 
 PROJECT NAME

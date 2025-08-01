@@ -49,8 +49,8 @@ Use frontmatter to specify when files should be included based on file patterns 
 ```markdown
 ---
 include_when:
-  - "**/*.test.js"
-  - "**/*.spec.ts"
+  - '**/*.test.js'
+  - '**/*.spec.ts'
 ---
 
 # Testing Standards
@@ -87,15 +87,19 @@ For examples, check: [Button Component](../src/components/Button.tsx)
 ## Best Practices
 
 ### Keep Files Focused
+
 Each steering file should address a specific concern or domain. This makes them easier to maintain and more effective at guiding Kiro's behavior.
 
 ### Use Clear Examples
+
 Include concrete code examples that demonstrate your preferred patterns. Kiro learns better from examples than abstract descriptions.
 
 ### Update Regularly
+
 Steering files should evolve with your project. When you establish new patterns or change existing ones, update the relevant steering files.
 
 ### Leverage Conditional Inclusion
+
 Use conditional inclusion to provide context-specific guidance. This keeps irrelevant information from cluttering Kiro's context while ensuring relevant knowledge is available when needed.
 
 ## Common Steering File Strategies
@@ -118,5 +122,5 @@ Custom steering files are stored in `.kiro/steering/` and become immediately ava
 
 ---
 
-*Source: [Kiro Documentation - Steering](https://kiro.dev/docs/steering/)*
-*Page updated: July 14, 2025*
+_Source: [Kiro Documentation - Steering](https://kiro.dev/docs/steering/)_
+_Page updated: July 14, 2025_

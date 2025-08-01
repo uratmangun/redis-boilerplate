@@ -1,6 +1,7 @@
 ---
 description: Synchronizes hook filenames to match their internal 'name' values, converting spaces to dashes and ensuring uppercase format
 ---
+
 Please synchronize all hook filenames in the .kiro/hooks directory to match their internal 'name' values. For each .kiro.hook file:
 
 1. Read the JSON content of each hook file

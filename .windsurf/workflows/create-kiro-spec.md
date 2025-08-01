@@ -36,25 +36,31 @@ Create `requirements.md` using structured EARS notation:
 4. **Non-functional Requirements**: Include performance, security, and usability requirements
 
 Template structure:
+
 ```markdown
 # Requirements Document
 
 ## Introduction
+
 [Brief overview of the feature and its purpose]
 
 ## Requirements
 
 ### Requirement 1
+
 **User Story:** As a [user], I want [goal], so that [benefit].
 
 #### Acceptance Criteria
+
 1. WHEN [condition] THEN the system SHALL [behavior]
 2. WHEN [condition] THEN the system SHALL [behavior]
 
 ### Requirement 2
+
 [Continue with additional requirements...]
 
 ## Non-functional Requirements
+
 - Performance: [specific performance criteria]
 - Security: [security requirements]
 - Usability: [usability standards]
@@ -71,28 +77,36 @@ Create `design.md` with technical architecture and implementation approach:
 5. **Implementation Strategy**: Approach and patterns to be used
 
 Template structure:
+
 ```markdown
 # Design Document
 
 ## System Architecture
+
 [High-level architecture overview]
 
 ## Component Design
+
 ### Component 1
+
 [Detailed component description]
 
 ### Component 2
+
 [Detailed component description]
 
 ## Sequence Diagrams
+
 [Process flows and interactions]
 
 ## Technical Considerations
+
 - Dependencies: [list of dependencies]
 - Constraints: [technical constraints]
 - Trade-offs: [design decisions and rationale]
 
 ## Implementation Strategy
+
 [Approach and patterns]
 ```
 
@@ -101,6 +115,7 @@ Template structure:
 Create `tasks.md` with ONLY the implementation plan - no extra text, headers, or explanations:
 
 **Important Guidelines:**
+
 - Start directly with `# Implementation Plan` heading
 - Include only the task list with checkboxes
 - No introductory text, task overview, success criteria, or quality standards
@@ -108,6 +123,7 @@ Create `tasks.md` with ONLY the implementation plan - no extra text, headers, or
 - Use requirement references at the end of each task
 
 Template structure:
+
 ```markdown
 # Implementation Plan
 
@@ -154,24 +170,28 @@ If using Kiro directly, you can start a spec session to refine the specification
 ## Best Practices
 
 ### Requirements Best Practices
+
 - Use structured EARS notation for acceptance criteria
 - Focus on "what" and "why", not "how"
 - Make requirements testable and measurable
 - Include both functional and non-functional requirements
 
 ### Design Best Practices
+
 - Document the big picture first, then dive into details
 - Include sequence diagrams for complex interactions
 - Address technical constraints and trade-offs
 - Consider scalability and maintainability
 
 ### Tasks Best Practices
+
 - Keep tasks small and focused (ideally 1-3 days of work)
 - Make tasks independent when possible
 - Include clear success criteria
 - Order tasks by dependencies and priority
 
 ### Iteration Best Practices
+
 - Treat specs as living documents
 - Update specs as requirements change
 - Sync specs with actual implementation

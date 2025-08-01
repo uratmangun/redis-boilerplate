@@ -7,6 +7,7 @@ I created a modern full-stack application that demonstrates the power of AI-driv
 The application combines a sleek React frontend with a Deno-powered backend, creating a seamless experience for adding, searching, and managing content. Users can perform natural language queries like "machine learning algorithms" and get relevant results even if the stored content uses terms like "AI models" or "neural networks."
 
 Key features include:
+
 - **Semantic Search**: Natural language queries powered by Google GenAI embeddings
 - **Real-time Interface**: Modern React UI with dark/light theme support
 - **Serverless Architecture**: Built for Deno Deploy and Cloudflare Pages
@@ -18,6 +19,7 @@ Key features include:
 🔗 **Repository**: [Redis AI Vector Search Boilerplate](https://github.com/your-username/redis-ai-vector-search)
 
 The project showcases a complete implementation with:
+
 - React 19 frontend with TypeScript and Tailwind CSS
 - Deno serverless functions for the API layer
 - Redis vector database with cosine similarity search
@@ -38,8 +40,8 @@ await redis.hset(itemKey, {
   content: item.content,
   titleEmbeddings: JSON.stringify(titleEmbeddings),
   contentEmbeddings: JSON.stringify(contentEmbeddings),
-  combinedEmbeddings: JSON.stringify(combinedEmbeddings)
-});
+  combinedEmbeddings: JSON.stringify(combinedEmbeddings),
+})
 ```
 
 ### Cosine Similarity Search
@@ -48,24 +50,26 @@ Instead of relying on Redis Search modules, I implemented cosine similarity calc
 
 ```typescript
 // Calculate cosine similarity between query and stored embeddings
-let dotProduct = 0;
-let queryMagnitude = 0;
-let storedMagnitude = 0;
+let dotProduct = 0
+let queryMagnitude = 0
+let storedMagnitude = 0
 
 for (let i = 0; i < queryEmbedding.length; i++) {
-  dotProduct += queryEmbedding[i] * storedEmbeddings[i];
-  queryMagnitude += queryEmbedding[i] * queryEmbedding[i];
-  storedMagnitude += storedEmbeddings[i] * storedEmbeddings[i];
+  dotProduct += queryEmbedding[i] * storedEmbeddings[i]
+  queryMagnitude += queryEmbedding[i] * queryEmbedding[i]
+  storedMagnitude += storedEmbeddings[i] * storedEmbeddings[i]
 }
 
-const similarity = dotProduct / (Math.sqrt(queryMagnitude) * Math.sqrt(storedMagnitude));
+const similarity =
+  dotProduct / (Math.sqrt(queryMagnitude) * Math.sqrt(storedMagnitude))
 ```
 
 ### Multi-Modal Search Strategy
 
 The application supports three distinct search modes:
+
 - **Title Search**: Searches only in document titles using title-specific embeddings
-- **Content Search**: Searches only in document content using content-specific embeddings  
+- **Content Search**: Searches only in document content using content-specific embeddings
 - **Combined Search**: Searches across both title and content using merged embeddings
 
 This flexibility allows users to fine-tune their search strategy based on their needs.
@@ -73,6 +77,7 @@ This flexibility allows users to fine-tune their search strategy based on their 
 ### Scalable Data Architecture
 
 Redis handles the complete data lifecycle:
+
 - **Storage**: Items stored as Redis hashes with structured fields
 - **Indexing**: Vector embeddings stored as JSON strings for efficient retrieval
 - **Search**: Scan operations combined with in-memory similarity calculations
@@ -81,6 +86,7 @@ Redis handles the complete data lifecycle:
 ### Performance Optimizations
 
 The implementation includes several Redis-specific optimizations:
+
 - **Batch Operations**: Using Redis pipelines for bulk operations
 - **Memory Efficiency**: Storing embeddings as compressed JSON strings
 - **Connection Pooling**: Efficient Redis connection management in serverless functions
@@ -99,4 +105,4 @@ The result is a powerful, scalable search system that understands context and me
 
 ---
 
-*Built with Redis 8, Deno, React, and Google GenAI - showcasing the future of intelligent search applications.*
+_Built with Redis 8, Deno, React, and Google GenAI - showcasing the future of intelligent search applications._

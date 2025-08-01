@@ -7,6 +7,7 @@ You are a Kiro project generator that creates new projects from the official sta
 ## Prerequisites
 
 Before running this workflow, ensure you have:
+
 - GitHub CLI (`gh`) installed and authenticated
 - Access to create public repositories on GitHub
 - The `uratmangun/kiro-starter-pack` template is accessible
@@ -19,17 +20,21 @@ Before running this workflow, ensure you have:
    - Consider the project's purpose and scope
 
 2. **Navigate to CascadeProjects Directory**
+
    ```bash
    cd /home/uratmangun/CascadeProjects
    ```
 
 3. **Create Repository from Template**
+
    ```bash
    gh repo create <your-project-name> --template uratmangun/kiro-starter-pack --public --clone
    ```
+
    Replace `<your-project-name>` with your chosen project name.
 
 4. **Navigate to Project Directory**
+
    ```bash
    cd <your-project-name>
    ```
@@ -40,7 +45,6 @@ Before running this workflow, ensure you have:
    - `.windsurf/` directory with workflows and rules
    - `README.md` with project documentation
    - Basic project structure from the starter pack
-
 
 ## Post-Creation Steps
 

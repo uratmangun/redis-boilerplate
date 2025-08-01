@@ -1,7 +1,7 @@
 ---
-name: "Fish Shell Execution Standards"
+name: 'Fish Shell Execution Standards'
 trigger: always_on
-description: "Enforces fish shell syntax for all terminal commands and provides conversion patterns from bash"
+description: 'Enforces fish shell syntax for all terminal commands and provides conversion patterns from bash'
 ---
 
 # Shell Execution Standards
@@ -35,11 +35,11 @@ set -U EDITOR vim
 
 ### Common Bash to Fish Conversions
 
-| Bash | Fish |
-|------|------|
-| `export VAR=value` | `set -x VAR value` |
-| `cmd1 && cmd2` | `cmd1; and cmd2` |
-| `cmd1 \|\| cmd2` | `cmd1; or cmd2` |
+| Bash               | Fish                |
+| ------------------ | ------------------- |
+| `export VAR=value` | `set -x VAR value`  |
+| `cmd1 && cmd2`     | `cmd1; and cmd2`    |
+| `cmd1 \|\| cmd2`   | `cmd1; or cmd2`     |
 | `if [ condition ]` | `if test condition` |
 
 ### Project-Specific Patterns

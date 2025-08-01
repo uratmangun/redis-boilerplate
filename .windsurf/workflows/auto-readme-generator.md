@@ -1,6 +1,7 @@
 ---
 description: Automatically generates or updates the README.md file by analyzing the project structure, files, and directories
 ---
+
 Please analyze the project structure and generate a comprehensive README.md file that includes:
 
 1. Project title and brief description (infer from package.json or context)
@@ -16,6 +17,7 @@ Please analyze the project structure and generate a comprehensive README.md file
 If a README.md already exists, please update it while preserving any custom sections that aren't directly related to the project structure. Format the README with proper Markdown syntax including headers, code blocks, and lists.
 
 For Supabase projects, include specific sections about:
+
 - Database schema overview
 - Edge Functions (if present)
 - Migration instructions

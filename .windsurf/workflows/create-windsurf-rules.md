@@ -29,37 +29,41 @@ You are a Windsurf rules generator that creates well-structured rule files follo
 
 4. **Structure the Rule Content**
    Follow this standard format:
-   
-   ```markdown
+
+   ````markdown
    # [Rule Title]
-   
+
    ## [Main Concept/Overview]
-   
+
    **MANDATORY**: Clear statement of what must be done or avoided.
-   
+
    ### [Sub-sections as needed]
+
    - Specific guidelines
    - Examples with code blocks
    - Configuration details
    - Best practices
-   
+
    ### [Common Patterns]
-   
+
    ```language
    // Good example
    code_example_here
-   
-   // Bad example  
+
+   // Bad example
    code_example_here
    ```
-   
+   ````
+
    ### [Additional Guidelines]
-   
    - Bullet points with specific rules
    - References to tools or commands
    - Exception handling (if any)
-   
+
    [Closing statement explaining the benefit/rationale]
+
+   ```
+
    ```
 
 5. **Include Essential Elements**
@@ -94,10 +98,10 @@ You are a Windsurf rules generator that creates well-structured rule files follo
 
 ## Example Rule Structure
 
-```markdown
+````markdown
 ---
 trigger: always_on
-description: "Enforces use of TypeScript for all new JavaScript files to improve code quality and maintainability"
+description: 'Enforces use of TypeScript for all new JavaScript files to improve code quality and maintainability'
 ---
 
 # TypeScript Usage Standards
@@ -123,6 +127,7 @@ description: "Enforces use of TypeScript for all new JavaScript files to improve
   }
 }
 ```
+````
 
 ### Migration Strategy
 
@@ -131,6 +136,8 @@ description: "Enforces use of TypeScript for all new JavaScript files to improve
 - Use interfaces for object structures
 
 This ensures better code quality, improved IDE support, and reduced runtime errors.
+
 ```
 
 The workflow will help create consistent, well-structured rules that integrate seamlessly with Windsurf's rule system.
+```

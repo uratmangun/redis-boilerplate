@@ -25,6 +25,8 @@ trigger: always_on
 ### Framework-Specific Examples
 
 **React/Create React App:**
+
 ```bash
 # Don't auto-run: npm start
 # Instead suggest: "Run 'npm start' to start the development server"
+```

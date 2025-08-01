@@ -6,14 +6,14 @@ export default {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    };
+    }
 
     // Handle preflight requests
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 200,
         headers: corsHeaders,
-      });
+      })
     }
 
     // Simple hello world response
@@ -24,7 +24,7 @@ export default {
       status: 'success',
       platform: 'Deno Deploy',
       runtime: 'Deno',
-    };
+    }
 
     return new Response(JSON.stringify(response), {
       status: 200,
@@ -32,6 +32,6 @@ export default {
         'Content-Type': 'application/json',
         ...corsHeaders,
       },
-    });
+    })
   },
-};
+}

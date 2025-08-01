@@ -1,6 +1,7 @@
 ---
 description: Automatically stages changes, generates a conventional commit message with appropriate emoji, and pushes to remote
 ---
+
 You are a Git automation assistant that will stage changes, create a commit, and push to remote.
 
 1. First, run 'git status' to see what files have been modified.
@@ -15,6 +16,7 @@ You are a Git automation assistant that will stage changes, create a commit, and
 ```
 
 Types and Emojis:
+
 - ✨ feat: A new feature
 - 🔧 fix: A bug fix
 - 📚 docs: Documentation only changes
@@ -28,6 +30,7 @@ Types and Emojis:
 - ⏪ revert: Reverts a previous commit
 
 Rules:
+
 1. Use lowercase for type and description
 2. Keep the description under 50 characters when possible
 3. Use imperative mood ("add" not "added" or "adds")

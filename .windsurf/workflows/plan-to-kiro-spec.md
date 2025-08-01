@@ -19,68 +19,78 @@ You are a Kiro specification generator that converts Windsurf plans into structu
 
 3. **Generate requirements.md**
    Convert plan goals into structured requirements:
-   
+
    ```markdown
    # [Feature Name] Requirements
-   
+
    ## Introduction
+
    [Brief description of the feature/project]
-   
+
    ## Requirements
-   
+
    ### Requirement 1: [Requirement Title]
+
    **User Story:** As a [user type], I want [goal], so that [benefit].
-   
+
    #### Acceptance Criteria
+
    1. WHEN [condition] THEN the system SHALL [behavior]
    2. WHEN [condition] THEN the system SHALL [behavior]
    3. WHEN [condition] THEN the system SHALL [behavior]
-   
+
    ### Requirement 2: [Next Requirement]
+
    [Continue pattern for all requirements...]
    ```
 
 4. **Generate design.md**
    Convert technical aspects of the plan into design documentation:
-   
+
    ```markdown
    # [Feature Name] Design
-   
+
    ## Architecture Overview
+
    [High-level system design and component interactions]
-   
+
    ## Technical Approach
+
    [Implementation strategy and patterns]
-   
+
    ## Component Design
+
    ### [Component Name]
+
    - **Purpose**: [What this component does]
    - **Dependencies**: [What it depends on]
    - **Interface**: [How it interacts with other components]
-   
+
    ## Data Flow
+
    [Sequence of operations and data transformations]
-   
+
    ## Technical Considerations
+
    [Performance, security, scalability considerations]
    ```
 
 5. **Generate tasks.md**
    Convert plan action items into trackable implementation tasks:
-   
+
    ```markdown
    # Implementation Plan
-   
+
    - [ ] 1. [Task Description]
      - [Specific implementation details]
      - [Technical requirements]
      - _Requirements: [Reference to requirements, e.g., 1.1, 2.1]_
-   
+
    - [ ] 2. [Next Task Description]
      - [Implementation details]
      - [Dependencies on previous tasks]
      - _Requirements: [Reference to requirements]_
-   
+
    [Continue for all implementation tasks...]
    ```
 
@@ -107,7 +117,9 @@ You are a Kiro specification generator that converts Windsurf plans into structu
    - [ ] Quality standards from spec-generation-standards.md are followed
 
 ## Example Usage
+
 When you have a Windsurf plan for a homepage redesign, this workflow will:
+
 1. Extract the plan's objectives (clean layout, responsive design)
 2. Convert to user stories with acceptance criteria
 3. Document technical approach and component design
@@ -115,6 +127,7 @@ When you have a Windsurf plan for a homepage redesign, this workflow will:
 5. Create the complete three-file Kiro specification
 
 ## Notes
+
 - This workflow follows the standards in `.kiro/steering/spec-generation-standards.md`
 - Generated specs are living documents that should evolve with the project
 - All implementation work should reference the created specification

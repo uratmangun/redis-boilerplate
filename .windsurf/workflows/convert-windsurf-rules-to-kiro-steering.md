@@ -13,33 +13,36 @@ You are a Windsurf-to-Kiro conversion tool that transforms Windsurf rule files i
 
 2. **Transform Frontmatter**
    Convert the Windsurf frontmatter structure:
-   
+
    **FROM (Windsurf format):**
+
    ```yaml
    ---
    trigger: always_on|manual|model_decision|glob
-   description: "Description of what the rule does"
-   globs: "**/pattern" # Only for glob trigger
+   description: 'Description of what the rule does'
+   globs: '**/pattern' # Only for glob trigger
    ---
    ```
-   
+
    **TO (Kiro format):**
-   
+
    **For non-glob triggers:**
+
    ```yaml
    ---
    inclusion: always
    ---
    ```
-   
+
    **For glob triggers:**
+
    ```yaml
    ---
    inclusion: fileMatch
    fileMatchPattern: ['pattern1', 'pattern2']
    ---
    ```
-   
+
    **Conversion Rules:**
    - `always_on`, `manual`, `model_decision` → `inclusion: always`
    - `glob` → `inclusion: fileMatch` + `fileMatchPattern: ['glob_pattern']`
@@ -51,7 +54,7 @@ You are a Windsurf-to-Kiro conversion tool that transforms Windsurf rule files i
    Convert the filename format:
    - **FROM**: `kebab-case-filename.md` (hyphens)
    - **TO**: `space separated filename.md` (spaces)
-   
+
    **Examples:**
    - `use-bun-or-pnpm-for-nodejs-dependency-manager.md` → `use bun or pnpm for nodejs dependency manager.md`
    - `enforce-typescript-usage.md` → `enforce typescript usage.md`
@@ -85,15 +88,15 @@ mkdir -p .kiro/steering
 for file in .windsurf/rules/*.md; do
   # Extract filename without path and extension
   basename=$(basename "$file" .md)
-  
+
   # Convert kebab-case to space-separated
   kiro_name=$(echo "$basename" | sed 's/-/ /g')
-  
+
   # Check if original file has glob trigger
   if grep -q "trigger: glob" "$file"; then
     # Extract glob pattern from original file
     glob_pattern=$(grep "globs:" "$file" | sed 's/globs: *"\(.*\)"/\1/')
-    
+
     # Create file with fileMatch frontmatter
     echo "---" > ".kiro/steering/$kiro_name.md"
     echo "inclusion: fileMatch" >> ".kiro/steering/$kiro_name.md"
@@ -105,9 +108,9 @@ for file in .windsurf/rules/*.md; do
     echo "inclusion: always" >> ".kiro/steering/$kiro_name.md"
     echo "---" >> ".kiro/steering/$kiro_name.md"
   fi
-  
+
   echo "" >> ".kiro/steering/$kiro_name.md"
-  
+
   # Append content after frontmatter (skip original frontmatter)
   tail -n +5 "$file" >> ".kiro/steering/$kiro_name.md"
 done
@@ -120,22 +123,26 @@ done
 3. Copy all content after the frontmatter (line 5 onwards)
 4. Create new Kiro steering file with space-separated filename
 5. Add appropriate Kiro frontmatter:
-   
+
    **For non-glob triggers:**
+
    ```yaml
    ---
    inclusion: always
    ---
    ```
-   
+
    **For glob triggers:**
+
    ```yaml
    ---
    inclusion: fileMatch
    fileMatchPattern: ['pattern1', 'pattern2']
    ---
    ```
+
    (Convert the `globs` field value to the `fileMatchPattern` array)
+
 6. Paste the copied content
 7. Save to `.kiro/steering/` directory
 

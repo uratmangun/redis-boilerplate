@@ -42,13 +42,13 @@ jobs:
         run: |
           PROJECT_NAME="${{ steps.deno_project_name.outputs.deno_project_name }}"
           echo "Creating Deno Deploy project if it doesn't exist: ${PROJECT_NAME}"
-          
+
           # Install latest deployctl using JSR
           deno install -A --global jsr:@deno/deployctl
-          
+
           # Set non-interactive mode to prevent browser authorization prompts
           export DENO_DEPLOY_TOKEN="${{ secrets.DENO_DEPLOY_TOKEN }}"
-          
+
           # Try to create the project (will succeed if it doesn't exist, fail silently if it does)
           deployctl projects create "${PROJECT_NAME}" --token="${DENO_DEPLOY_TOKEN}" || echo "Project may already exist - continuing"
         env:
@@ -58,16 +58,16 @@ jobs:
         run: |
           PROJECT_NAME="${{ steps.deno_project_name.outputs.deno_project_name }}"
           echo "Deploying to Deno Deploy project: ${PROJECT_NAME}"
-          
+
           # Verify deno.json exists
           if [ ! -f "deno.json" ]; then
             echo "❌ Error: deno.json not found"
             exit 1
           fi
-          
+
           echo "✅ Found deno.json with import map"
           cat deno.json
-          
+
           # Deploy with explicit configuration and proper import map
           deployctl deploy \
             --project="${PROJECT_NAME}" \
@@ -131,7 +131,6 @@ jobs:
           # Privy Authentication Configuration
           VITE_PRIVY_APP_ID: ${{ secrets.VITE_PRIVY_APP_ID }}
           VITE_PRIVY_CLIENT_ID: ${{ secrets.VITE_PRIVY_CLIENT_ID }}
-          
 
       - name: Set project name from repository
         id: project_name
@@ -144,12 +143,12 @@ jobs:
         run: |
           PROJECT_NAME="${{ steps.project_name.outputs.project_name }}"
           echo "Using project name: $PROJECT_NAME"
-          
+
           # Try to get the project first
           PROJECT_EXISTS=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/$PROJECT_NAME" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" | jq -r '.success')
-          
+
           if [ "$PROJECT_EXISTS" != "true" ]; then
             echo "Project doesn't exist, creating new Cloudflare Pages project..."
             curl -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
@@ -178,9 +177,9 @@ jobs:
         run: |
           PROJECT_NAME="${{ steps.project_name.outputs.project_name }}"
           DENO_URL="${{ needs.deploy-deno.outputs.deno_url }}"
-          
+
           echo "Setting VITE_DENO_API_URL to: ${DENO_URL}"
-          
+
           # Set environment variable for production environment
           curl -X PATCH "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/${PROJECT_NAME}" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
@@ -196,7 +195,7 @@ jobs:
                 }
               }
             }"
-          
+
           echo "Environment variable VITE_DENO_API_URL set successfully"
 
       - name: Update repository website URL
@@ -206,7 +205,7 @@ jobs:
           github-token: ${{ secrets.ADMIN_TOKEN }}
           script: |
             const deploymentUrl = "${{ steps.cloudflare_pages_deploy.outputs.url }}";
-            
+
             if (deploymentUrl) {
               try {
                 await github.rest.repos.update({
@@ -228,7 +227,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const deploymentUrl = "${{ steps.cloudflare_pages_deploy.outputs.url }}";
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

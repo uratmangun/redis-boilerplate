@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from 'react-router-dom'
 import { StagewiseToolbar } from '@stagewise/toolbar-react'
 import ReactPlugin from '@stagewise-plugins/react'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -9,7 +14,7 @@ import { HomePage } from '@/components/HomePage'
 function AISearchPageWrapper() {
   const navigate = useNavigate()
   const handleBack = () => navigate('/')
-  
+
   return <AISearchPage onBack={handleBack} />
 }
 

@@ -87,5 +87,5 @@ This approach allows you to:
 
 ---
 
-*Source: [Kiro Documentation - Specs Best Practices](https://kiro.dev/docs/specs/best-practices/)*
-*Page updated: July 14, 2025*
+_Source: [Kiro Documentation - Specs Best Practices](https://kiro.dev/docs/specs/best-practices/)_
+_Page updated: July 14, 2025_

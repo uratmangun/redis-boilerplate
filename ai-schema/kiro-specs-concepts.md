@@ -2,18 +2,18 @@
 
 Specs bridge the gap between conceptual product requirements and technical implementation details, ensuring alignment and reducing development iterations. Kiro generates three key files that form the foundation of each specification:
 
-*   **requirements.md** - Captures user stories and acceptance criteria in structured EARS notation
-*   **design.md** - Documents technical architecture, sequence diagrams, and implementation considerations
-*   **tasks.md** - Provides a detailed implementation plan with discrete, trackable tasks
+- **requirements.md** - Captures user stories and acceptance criteria in structured EARS notation
+- **design.md** - Documents technical architecture, sequence diagrams, and implementation considerations
+- **tasks.md** - Provides a detailed implementation plan with discrete, trackable tasks
 
 ## Workflow
 
 The workflow follows a logical progression with decision points between phases, ensuring each step is properly completed before moving to the next.
 
-*   **Requirements Phase** (leftmost section): Define user stories and acceptance criteria in structured EARS notation
-*   **Design Phase** (second section): Document the technical architecture, sequence diagrams, and implementation considerations
-*   **Implementation Planning** (third section): Break down the work into discrete, trackable tasks with clear descriptions and outcomes
-*   **Execution Phase** (rightmost section): Track progress as tasks are completed, with the ability to update and refine the spec as needed
+- **Requirements Phase** (leftmost section): Define user stories and acceptance criteria in structured EARS notation
+- **Design Phase** (second section): Document the technical architecture, sequence diagrams, and implementation considerations
+- **Implementation Planning** (third section): Break down the work into discrete, trackable tasks with clear descriptions and outcomes
+- **Execution Phase** (rightmost section): Track progress as tasks are completed, with the ability to update and refine the spec as needed
 
 ## Requirements
 
@@ -40,5 +40,5 @@ Kiro provides a task execution interface for `tasks.md` files that displays real
 
 ---
 
-*Source: [Kiro Documentation - Specs Concepts](https://kiro.dev/docs/specs/concepts/)*
-*Page updated: July 14, 2025*
+_Source: [Kiro Documentation - Specs Concepts](https://kiro.dev/docs/specs/concepts/)_
+_Page updated: July 14, 2025_

@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: "Enforces use of pnpm with yarn fallback for Node.js dependency management"
+description: 'Enforces use of pnpm with yarn fallback for Node.js dependency management'
 ---
 
 # Node.js Package Manager Standards
@@ -10,6 +10,7 @@ description: "Enforces use of pnpm with yarn fallback for Node.js dependency man
 **MANDATORY**: Use `pnpm` as the primary package manager, with `yarn` as fallback only if pnpm doesn't exist or encounters errors. Never use `npm` or `bun`.
 
 ### Preferred Order
+
 1. **pnpm** - Efficient disk usage, strict dependency resolution, fast performance
 2. **yarn** - Fallback option when pnpm is unavailable or fails
 
@@ -39,6 +40,7 @@ yarn run <script>
 ### Script Execution
 
 Always use the detected package manager for running scripts:
+
 - `pnpm dev` (preferred)
 - `yarn dev` (fallback only)
 

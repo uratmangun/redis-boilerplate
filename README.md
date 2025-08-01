@@ -15,6 +15,7 @@ A modern full-stack application demonstrating AI-powered semantic search using R
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **React 19** - Modern UI library with latest features
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
@@ -23,12 +24,14 @@ A modern full-stack application demonstrating AI-powered semantic search using R
 - **Radix UI** - Accessible component primitives
 
 ### Backend
+
 - **Deno** - Modern JavaScript/TypeScript runtime
 - **Redis** - Vector database and caching
 - **Google GenAI** - Text embedding generation
 - **Serverless Functions** - Modular API architecture
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **Concurrently** - Parallel script execution
 - **pnpm** - Fast package manager
@@ -36,6 +39,7 @@ A modern full-stack application demonstrating AI-powered semantic search using R
 ## 📦 Installation
 
 ### Prerequisites
+
 - [Deno](https://deno.land/) (latest version)
 - [Node.js](https://nodejs.org/) (18+ for frontend)
 - [pnpm](https://pnpm.io/) (recommended) or yarn
@@ -45,32 +49,37 @@ A modern full-stack application demonstrating AI-powered semantic search using R
 ### Setup Steps
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd redis-ai-vector-search
    ```
 
 2. **Install frontend dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Configure environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` with your configuration:
+
    ```env
    REDIS_URL=redis://localhost:6379
    GOOGLE_AI_API_KEY=your_google_ai_api_key
    ```
 
 4. **Start Redis** (if running locally)
+
    ```bash
    # Using Docker
    docker run -d -p 6379:6379 redis:alpine
-   
+
    # Or install Redis locally
    # macOS: brew install redis && brew services start redis
    # Ubuntu: sudo apt install redis-server
@@ -87,17 +96,20 @@ pnpm dev
 ```
 
 This runs:
+
 - Frontend (Vite): http://localhost:5173
 - Backend (Deno): http://localhost:8000
 
 ### Individual Services
 
 **Frontend only:**
+
 ```bash
 pnpm dev:vite
 ```
 
 **Backend only:**
+
 ```bash
 pnpm dev:deno
 ```
@@ -145,20 +157,20 @@ The application supports various Redis providers:
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `REDIS_URL` | Redis connection string | Yes |
-| `GOOGLE_AI_API_KEY` | Google GenAI API key | Yes |
+| Variable            | Description             | Required |
+| ------------------- | ----------------------- | -------- |
+| `REDIS_URL`         | Redis connection string | Yes      |
+| `GOOGLE_AI_API_KEY` | Google GenAI API key    | Yes      |
 
 ### API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/init-index` | POST | Initialize Redis search index |
-| `/api/add-item` | POST | Add new searchable item |
+| Endpoint            | Method   | Description                     |
+| ------------------- | -------- | ------------------------------- |
+| `/api/init-index`   | POST     | Initialize Redis search index   |
+| `/api/add-item`     | POST     | Add new searchable item         |
 | `/api/search-items` | GET/POST | Semantic search with embeddings |
-| `/api/get-item` | GET | Retrieve item by ID |
-| `/api/delete-item` | DELETE | Remove item from database |
+| `/api/get-item`     | GET      | Retrieve item by ID             |
+| `/api/delete-item`  | DELETE   | Remove item from database       |
 
 ## 🎯 How It Works
 
@@ -172,7 +184,7 @@ The application supports various Redis providers:
 ### Search Types
 
 - **Title Search**: Search only in item titles
-- **Content Search**: Search only in item content  
+- **Content Search**: Search only in item content
 - **Combined Search**: Search across title and content (default)
 
 ## 🚀 Deployment

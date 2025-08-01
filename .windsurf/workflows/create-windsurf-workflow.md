@@ -23,31 +23,35 @@ You are a Windsurf workflow generator that creates well-structured workflow file
 
 4. **Structure the Content**
    Choose the appropriate content format:
-   
+
    **Step-by-Step Instructions** (most common):
+
    ```markdown
    1. First step description
    2. Second step description
    3. Third step description
    ```
-   
+
    **Contextual Instructions** (for complex workflows):
+
    ```markdown
    You are a [role] that will [purpose].
-   
+
    [Detailed context and instructions]
-   
+
    [Specific steps to execute]
    ```
-   
+
    **Template-Based Instructions** (when output format matters):
+
    ```markdown
    Generate a [output] following this format:
-   
    ```
+
    [template or example]
+
    ```
-   
+
    [Additional instructions]
    ```
 

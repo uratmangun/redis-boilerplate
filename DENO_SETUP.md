@@ -7,14 +7,17 @@ This project includes a simple Deno function that can be deployed to Deno Deploy
 ### Option 1: Full Development (React + Deno)
 
 1. **Install Deno** (if not already installed):
+
    ```bash
    curl -fsSL https://deno.land/install.sh | sh
    ```
 
 2. **Start both React and Deno servers**:
+
    ```bash
    pnpm dev
    ```
+
    This will start:
    - React app on `http://localhost:5173`
    - Deno server on `http://localhost:8000`
@@ -27,6 +30,7 @@ This project includes a simple Deno function that can be deployed to Deno Deploy
 ### Option 2: React Only (without Deno)
 
 1. **Start only React server**:
+
    ```bash
    pnpm dev:vite
    ```
@@ -53,10 +57,12 @@ The React app will automatically try to call the local Deno server first, and fa
 ## Deployment
 
 This project uses a **hybrid deployment strategy**:
+
 - **React App**: Deployed to Cloudflare Pages
 - **API Function**: Deployed to Deno Deploy
 
 ### 1. Deploy Deno Function to Deno Deploy
+
 1. Go to [dash.deno.com](https://dash.deno.com)
 2. Create a new project
 3. Connect your GitHub repository
@@ -64,6 +70,7 @@ This project uses a **hybrid deployment strategy**:
 5. Deploy and note the deployment URL (e.g., `https://your-project.deno.dev`)
 
 ### 2. Deploy React App to Cloudflare Pages
+
 1. Go to Cloudflare Pages dashboard
 2. Connect your GitHub repository
 3. Set build command: `npm run build`
@@ -74,6 +81,7 @@ This project uses a **hybrid deployment strategy**:
 ## Function Response
 
 The function returns a JSON response with:
+
 - `message`: Hello message
 - `timestamp`: Current timestamp
 - `randomNumber`: Random number

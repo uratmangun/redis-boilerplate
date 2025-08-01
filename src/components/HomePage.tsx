@@ -19,8 +19,9 @@ export function HomePage() {
             Redis Boilerplate
           </h1>
           <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
-            This is a Redis boilerplate for you to create Redis app easily using React, Cloudflare, and Deno function.
-            Get started quickly with a modern stack and Redis integration.
+            This is a Redis boilerplate for you to create Redis app easily using
+            React, Cloudflare, and Deno function. Get started quickly with a
+            modern stack and Redis integration.
           </p>
         </div>
 
@@ -33,30 +34,50 @@ export function HomePage() {
                 Create New Repository from Template
               </CardTitle>
               <CardDescription className="text-blue-600 dark:text-blue-400">
-                Use GitHub CLI to quickly create a new Redis project from this template
+                Use GitHub CLI to quickly create a new Redis project from this
+                template
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-slate-900 dark:bg-slate-800 rounded-lg p-4 relative group">
                 <code className="text-green-400 font-mono text-sm block">
-                  gh repo create my-redis-app --template uratmangun/redis-boilerplate --public --clone
+                  gh repo create my-redis-app --template
+                  uratmangun/redis-boilerplate --public --clone
                 </code>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => navigator.clipboard.writeText('gh repo create my-redis-app --template uratmangun/redis-boilerplate --public --clone')}
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      'gh repo create my-redis-app --template uratmangun/redis-boilerplate --public --clone'
+                    )
+                  }
                 >
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
-              
+
               <div className="text-sm text-muted-foreground space-y-2">
-                <p>Replace <code className="bg-muted px-1 py-0.5 rounded text-xs">my-redis-app</code> with your desired repository name.</p>
+                <p>
+                  Replace{' '}
+                  <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                    my-redis-app
+                  </code>{' '}
+                  with your desired repository name.
+                </p>
                 <p>This command will:</p>
                 <ul className="list-disc list-inside ml-4 space-y-1">
-                  <li>Create a new repository from this Redis boilerplate template</li>
-                  <li>Set it as public (use <code className="bg-muted px-1 py-0.5 rounded text-xs">--private</code> for private repos)</li>
+                  <li>
+                    Create a new repository from this Redis boilerplate template
+                  </li>
+                  <li>
+                    Set it as public (use{' '}
+                    <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                      --private
+                    </code>{' '}
+                    for private repos)
+                  </li>
                   <li>Clone the repository to your local machine</li>
                   <li>Set up all Redis boilerplate files and configurations</li>
                 </ul>
@@ -64,7 +85,12 @@ export function HomePage() {
             </CardContent>
             <CardFooter>
               <Button variant="outline" className="w-full" asChild>
-                <a href="https://github.com/uratmangun/redis-boilerplate" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <a
+                  href="https://github.com/uratmangun/redis-boilerplate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2"
+                >
                   <Github className="h-4 w-4" />
                   View Template Repository
                 </a>
@@ -86,14 +112,14 @@ export function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Powered by Redis Vector Search and AI embeddings. Find relevant content using natural language queries with semantic understanding.
+                Powered by Redis Vector Search and AI embeddings. Find relevant
+                content using natural language queries with semantic
+                understanding.
               </p>
             </CardContent>
             <CardFooter>
               <Button variant="outline" className="w-full" asChild>
-                <Link to="/aisearchpage">
-                  Try AI Search
-                </Link>
+                <Link to="/aisearchpage">Try AI Search</Link>
               </Button>
             </CardFooter>
           </Card>

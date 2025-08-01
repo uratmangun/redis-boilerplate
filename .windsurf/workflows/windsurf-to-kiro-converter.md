@@ -1,6 +1,7 @@
 ---
 description: Automatically converts Windsurf workflow files (.md) to Kiro agent hooks (.kiro.hook) format
 ---
+
 You are a workflow converter that transforms Windsurf workflows to Kiro hooks format.
 
 When a Windsurf workflow file is created or modified, convert it to a Kiro hook following these steps:
