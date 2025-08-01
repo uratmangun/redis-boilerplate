@@ -164,7 +164,7 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
           relevanceScore: 1.0
         };
         
-        setSearchResults([newItem, ...searchResults]);
+        
         setNewItemTitle('');
         setNewItemContent('');
         setNotification({

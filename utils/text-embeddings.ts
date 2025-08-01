@@ -53,7 +53,7 @@ async function generateSentenceEmbeddings(sentence: string): Promise<number[]> {
       throw new Error('Failed to generate embeddings from Google GenAI');
     }
 
-    return response.embeddings;
+    return response.embeddings[0].values;
   } catch (error) {
     console.error('Google GenAI embedding generation failed:', error);
     throw new Error(`Google GenAI embedding failed: ${error.message}`);
