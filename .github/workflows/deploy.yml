@@ -74,6 +74,7 @@ jobs:
             --config=deno.json \
             --token="${{ secrets.DENO_DEPLOY_TOKEN }}" \
             --exclude=node_modules,dist,build,.git,src,public,*.md \
+            --prod \
             --env=REDIS_URL="${{ secrets.REDIS_URL }}" \
             --env=GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
             main.ts
