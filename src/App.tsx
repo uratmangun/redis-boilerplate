@@ -4,8 +4,6 @@ import {
   Route,
   useNavigate,
 } from 'react-router-dom'
-import { StagewiseToolbar } from '@stagewise/toolbar-react'
-import ReactPlugin from '@stagewise-plugins/react'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { AISearchPage } from '@/components/AISearchPage'
@@ -22,11 +20,6 @@ function App() {
   return (
     <Router>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <StagewiseToolbar
-          config={{
-            plugins: [ReactPlugin],
-          }}
-        />
         <ThemeToggle />
         <Routes>
           <Route path="/" element={<HomePage />} />
