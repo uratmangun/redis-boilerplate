@@ -60,12 +60,7 @@ export default {
       const availableFunctions = Object.keys(functions)
       const response = {
         message: 'Deno Deploy Function Router',
-        availableFunctions,
-        usage: availableFunctions.map(name => ({
-          function: name,
-          endpoints: [`${url.origin}/api/${name}`, `${url.origin}/${name}`],
-        })),
-        timestamp: new Date().toISOString(),
+               timestamp: new Date().toISOString(),
       }
 
       return new Response(JSON.stringify(response, null, 2), {

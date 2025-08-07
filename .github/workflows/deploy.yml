@@ -76,12 +76,12 @@ jobs:
             --exclude=node_modules,dist,build,.git,src,public,*.md \
             --prod \
             --env=REDIS_URL="${{ secrets.REDIS_URL }}" \
-            --env=GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
+            --env=NOMIC_API_KEY="${{ secrets.NOMIC_API_KEY }}" \
             main.ts
         env:
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
-          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+          NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
 
       - name: Get Deno Deploy URL
         id: deno_url
@@ -129,9 +129,6 @@ jobs:
           NODE_ENV: production
           # Deno API Configuration
           VITE_DENO_API_URL: ${{ needs.deploy-deno.outputs.deno_url }}
-          # Privy Authentication Configuration
-          VITE_PRIVY_APP_ID: ${{ secrets.VITE_PRIVY_APP_ID }}
-          VITE_PRIVY_CLIENT_ID: ${{ secrets.VITE_PRIVY_CLIENT_ID }}
 
       - name: Set project name from repository
         id: project_name

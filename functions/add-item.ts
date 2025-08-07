@@ -4,7 +4,6 @@ import { generateTextEmbeddings } from '../utils/text-embeddings.ts'
 
 interface AddItemRequest {
   title: string
-  content: string
   category?: string
   ttlSeconds?: number // Time to live in seconds (optional, defaults to 1 day)
 }
@@ -15,7 +14,6 @@ interface AddItemResponse {
   item?: {
     id: string
     title: string
-    content: string
     category: string
     createdAt: string
     updatedAt: string
@@ -63,12 +61,12 @@ export default {
       // Parse request body
       const body: AddItemRequest = await request.json()
 
-      // Validate required fields
-      if (!body.title || !body.content) {
+      // Validate required fields (only title is required now)
+      if (!body.title) {
         return new Response(
           JSON.stringify({
             success: false,
-            message: 'Title and content are required fields.',
+            message: 'Title is required.',
             timestamp: new Date().toISOString(),
           }),
           {
@@ -117,11 +115,10 @@ export default {
       // Calculate expiration time (always required now)
       const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString()
 
-      // Generate vector embeddings for title and content
+      // Generate vector embeddings only for title (content is same as title)
       const titleEmbedding = await generateTextEmbeddings(body.title)
-      const contentEmbedding = await generateTextEmbeddings(body.content)
-      const combinedText = `${body.title} ${body.content}`
-      const combinedEmbedding = await generateTextEmbeddings(combinedText)
+      const contentEmbedding = await generateTextEmbeddings(body.title)
+      const combinedEmbedding = await generateTextEmbeddings(body.title)
 
       if (
         titleEmbedding.error ||
@@ -148,7 +145,7 @@ export default {
       const item = {
         id: itemId,
         title: body.title,
-        content: body.content,
+        content: body.title, // Content is same as title
         category: body.category || 'General',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -163,7 +160,7 @@ export default {
       const itemData = {
         id: itemId,
         title: body.title,
-        content: body.content,
+        content: body.title, // Content is same as title
         category: body.category || 'General',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

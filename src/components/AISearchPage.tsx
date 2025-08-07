@@ -45,7 +45,6 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchItem[]>([])
   const [newItemTitle, setNewItemTitle] = useState('')
-  const [newItemContent, setNewItemContent] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | null
@@ -134,10 +133,10 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
   }
 
   const handleAddItem = async () => {
-    if (!newItemTitle.trim() || !newItemContent.trim()) {
+    if (!newItemTitle.trim()) {
       setNotification({
         type: 'error',
-        message: 'Please fill in both title and content',
+        message: 'Please fill in the title',
       })
       setTimeout(() => setNotification({ type: null, message: '' }), 5000)
       return
@@ -175,7 +174,7 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
         },
         body: JSON.stringify({
           title: newItemTitle,
-          content: newItemContent,
+          content: newItemTitle, // Use title as content since user only wants title input
           category: 'User Added',
         }),
       })
@@ -184,7 +183,6 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
 
       if (result.success) {
         setNewItemTitle('')
-        setNewItemContent('')
         setNotification({
           type: 'success',
           message: 'Item added successfully to Redis!',
@@ -516,11 +514,6 @@ export function AISearchPage({ onBack }: AISearchPageProps) {
               placeholder="Item title..."
               value={newItemTitle}
               onChange={e => setNewItemTitle(e.target.value)}
-            />
-            <Input
-              placeholder="Item content..."
-              value={newItemContent}
-              onChange={e => setNewItemContent(e.target.value)}
             />
             <Button onClick={handleAddItem} className="w-full">
               Add Item
